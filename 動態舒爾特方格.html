@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>動態舒爾特方格產生器 (Dynamic Schulte Table)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #fdf2f8 100%);
+            min-height: 100vh;
+        }
+        .schulte-cell {
+            aspect-ratio: 1;
+            user-select: none;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .schulte-cell:active {
+            transform: scale(0.95);
+        }
+        @keyframes pulse-success {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); background-color: #4ade80; color: white; }
+            100% { transform: scale(1); }
+        }
+        .animate-success {
+            animation: pulse-success 0.3s ease-in-out;
+        }
+        @keyframes shake-error {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+        .animate-error {
+            animation: shake-error 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                    <i class="fa-solid fa-table-cells text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">動態舒爾特方格</h1>
+                    <p class="text-xs text-slate-500">專注力與動態視覺反應訓練器</p>
+                </div>
+            </div>
+            <!-- Quick Stats in Header -->
+            <a href="index.html" class="no-print inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 shadow-sm transition"><span>🏠 返回教學大廳</span></a>
+            <div id="header-stats" class="hidden sm:flex items-center space-x-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100 text-sm">
+                <div><span class="text-slate-400 text-xs block">用時</span><span id="header-timer" class="font-bold text-slate-700">0.0秒</span></div>
+                <div class="h-6 w-px bg-slate-200"></div>
+                <div><span class="text-slate-400 text-xs block">進度</span><span id="header-progress" class="font-bold text-indigo-600">0 / 25</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6 flex flex-col items-center justify-start">
+
+        <!-- Controls Card / Settings Panel -->
+        <div id="settings-card" class="w-full bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-xl shadow-slate-100 border border-slate-100 mb-6 transition-all duration-300">
+            <div class="flex flex-col md:flex-row gap-6 items-center justify-between">
+                
+                <!-- Grid Size Selection -->
+                <div class="w-full md:w-auto flex-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">方格尺寸 (Grid Size)</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setGridSize(3)" id="size-btn-3" class="size-btn py-2.5 px-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all">3×3</button>
+                        <button onclick="setGridSize(4)" id="size-btn-4" class="size-btn py-2.5 px-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all">4×4</button>
+                        <button onclick="setGridSize(5)" id="size-btn-5" class="size-btn py-2.5 px-3 rounded-xl border border-indigo-600 bg-indigo-50 text-sm font-semibold text-indigo-600 transition-all shadow-sm">5×5</button>
+                        <button onclick="setGridSize(6)" id="size-btn-6" class="size-btn py-2.5 px-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all">6×6</button>
+                    </div>
+                </div>
+
+                <!-- Mode Selection -->
+                <div class="w-full md:w-auto flex-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">訓練模式 (Mode)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setMode('standard')" id="mode-btn-standard" class="mode-btn py-2.5 px-3 rounded-xl border border-indigo-600 bg-indigo-50 text-sm font-semibold text-indigo-600 transition-all shadow-sm">標準數字</button>
+                        <button onclick="setMode('dynamic')" id="mode-btn-dynamic" class="mode-btn py-2.5 px-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-arrows-spin text-xs"></i> 動態亂序
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="w-full md:w-auto flex items-end">
+                    <button onclick="startGame()" class="w-full md:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> 開始挑戰
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Options Toggle -->
+            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="sound-toggle" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                        <span>啟用音效回饋</span>
+                    </label>
+                    <label id="dynamic-speed-container" class="hidden items-center gap-2">
+                        <span>動態速度:</span>
+                        <select id="dynamic-speed" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 focus:outline-none focus:border-indigo-600">
+                            <option value="2000">慢速 (2秒)</option>
+                            <option value="1200" selected>標準 (1.2秒)</option>
+                            <option value="700">快速 (0.7秒)</option>
+                        </select>
+                    </label>
+                </div>
+                <div>
+                    <span id="mode-desc" class="text-indigo-600 font-medium">提示：點擊數字 1 開始順序點擊至最大數字。</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container" class="w-full max-w-xl bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-2xl shadow-slate-200 border border-slate-100 flex flex-col items-center relative min-h-[420px] justify-center">
+            
+            <!-- Pre-game state overlay / message -->
+            <div id="game-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center rounded-3xl p-6 text-center transition-all">
+                <div class="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl mb-4 shadow-inner">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">準備好測試專注力了嗎？</h3>
+                <p class="text-sm text-slate-500 max-w-sm mb-6">請依序點擊從 <span id="overlay-min" class="font-bold text-indigo-600">1</span> 到 <span id="overlay-max" class="font-bold text-indigo-600">25</span> 的數字。動態模式下數字會自動隨機交換位置，挑戰眼球動態追蹤極限！</p>
+                <button onclick="startGame()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-indigo-200 transition-all transform hover:scale-105">
+                    立即開始
+                </button>
+            </div>
+
+            <!-- Active Game Header Info inside board -->
+            <div class="w-full flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">目前目標:</span>
+                    <span id="current-target" class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center text-lg shadow-sm">1</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">計時器</span>
+                        <span id="live-timer" class="font-mono font-bold text-slate-700 text-lg">0.0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Grid Itself -->
+            <div id="schulte-grid" class="w-full grid gap-3 p-2 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                <!-- Grid cells injected via JS -->
+            </div>
+        </div>
+
+        <div id="result-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center transform scale-95 transition-transform duration-300" id="result-modal-content">
+                <div id="result-icon" class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-500 mx-auto flex items-center justify-center text-4xl mb-4 shadow-lg shadow-emerald-100">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-1">挑戰完成！</h3>
+                <p id="result-subtitle" class="text-sm text-slate-500 mb-6">太棒了，你的專注力非常敏銳！</p>
+                
+                <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-100 space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">總花費時間</span>
+                        <span id="res-time" class="font-bold font-mono text-slate-700 text-base">0.0秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">方格規格</span>
+                        <span id="res-size" class="font-bold text-slate-700">5 × 5</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">模式</span>
+                        <span id="res-mode" class="font-bold text-indigo-600">動態亂序</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="closeResultModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-2xl transition-all">
+                        返回設定
+                    </button>
+                    <button onclick="startGame()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl shadow-lg shadow-indigo-200 transition-all">
+                        再次挑戰
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History / Records section -->
+        <div class="w-full max-w-xl mt-6 bg-white/60 backdrop-blur-sm rounded-3xl p-5 border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-medal text-indigo-500"></i> 本地最佳紀錄 (Best Records)
+                </h4>
+                <button onclick="clearRecords()" class="text-xs text-slate-400 hover:text-rose-500 transition-colors">清除紀錄</button>
+            </div>
+            <div id="records-list" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-slate-400 block mb-1">3×3 標準</span>
+                    <span id="rec-3-standard" class="font-bold font-mono text-slate-700 text-sm">--</span>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-slate-400 block mb-1">4×4 標準</span>
+                    <span id="rec-4-standard" class="font-bold font-mono text-slate-700 text-sm">--</span>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-slate-400 block mb-1">5×5 標準</span>
+                    <span id="rec-5-standard" class="font-bold font-mono text-slate-700 text-sm">--</span>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-slate-400 block mb-1">5×5 動態</span>
+                    <span id="rec-5-dynamic" class="font-bold font-mono text-indigo-600 text-sm">--</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="py-6 text-center text-xs text-slate-400 border-t border-slate-100 mt-auto">
+        <p>動態舒爾特方格產生器 &copy; 2026 | 訓練專注力、周邊視野與動態視覺</p>
+    </footer>
+
+    <script>
+        // Game State Variables
+        let gridSize = 5;
+        let mode = 'standard'; // 'standard' or 'dynamic'
+        let numbers = [];
+        let currentTarget = 1;
+        let gameActive = false;
+        let startTime = null;
+        let timerInterval = null;
+        let dynamicInterval = null;
+        let audioCtx = null;
+
+        // Initialize Audio Context on first interaction
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play feedback sounds using Web Audio API
+        function playTone(type) {
+            const soundEnabled = document.getElementById('sound-toggle').checked;
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'success') {
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); // A5
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(120, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                } else if (type === 'complete') {
+                    const now = audioCtx.currentTime;
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.12); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.24); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.36); // C6
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    osc.start();
+                    osc.stop(now + 0.6);
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        // Set Grid Size handler
+        function setGridSize(size) {
+            gridSize = size;
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.className = "size-btn py-2.5 px-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all";
+            });
+            const activeBtn = document.getElementById(`size-btn-${size}`);
+            if (activeBtn) {
+                activeBtn.className = "size-btn py-2.5 px-3 rounded-xl border border-indigo-600 bg-indigo-50 text-sm font-semibold text-indigo-600 transition-all shadow-sm";
+            }
+            updateOverlayText();
+            if (!gameActive) {
+                renderInitialGrid();
+            }
+        }
+
+        // Set Mode handler
+        function setMode(selectedMode) {
+            mode = selectedMode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.className = "mode-btn py-2.5 px-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all";
+            });
+            const activeBtn = document.getElementById(`mode-btn-${selectedMode}`);
+            if (activeBtn) {
+                activeBtn.className = "mode-btn py-2.5 px-3 rounded-xl border border-indigo-600 bg-indigo-50 text-sm font-semibold text-indigo-600 transition-all shadow-sm";
+            }
+
+            const speedContainer = document.getElementById('dynamic-speed-container');
+            const modeDesc = document.getElementById('mode-desc');
+
+            if (mode === 'dynamic') {
+                speedContainer.classList.remove('hidden');
+                speedContainer.classList.add('flex');
+                modeDesc.textContent = "動態模式：方格數字會定時隨機互換位置，考驗瞬時反應與動態視覺！";
+            } else {
+                speedContainer.classList.remove('flex');
+                speedContainer.classList.add('hidden');
+                modeDesc.textContent = "標準模式：傳統舒爾特方格，訓練周邊視野與快速掃視能力。";
+            }
+            updateOverlayText();
+        }
+
+        function updateOverlayText() {
+            const max = gridSize * gridSize;
+            document.getElementById('overlay-max').textContent = max;
+        }
+
+        // Render initial static preview grid
+        function renderInitialGrid() {
+            const gridEl = document.getElementById('schulte-grid');
+            gridEl.style.gridTemplateColumns = `repeat(${gridSize}, minmax(0, 1fr))`;
+            gridEl.innerHTML = '';
+
+            const total = gridSize * gridSize;
+            const tempNums = Array.from({ length: total }, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+
+            tempNums.forEach(num => {
+                const cell = document.createElement('div');
+                cell.className = "schulte-cell bg-white rounded-xl border border-slate-200 flex items-center justify-center font-bold text-slate-600 text-lg shadow-sm select-none";
+                cell.textContent = num;
+                gridEl.appendChild(cell);
+            });
+        }
+
+        // Start Game function
+        function startGame() {
+            initAudio();
+            clearInterval(timerInterval);
+            clearInterval(dynamicInterval);
+
+            gameActive = true;
+            currentTarget = 1;
+            const total = gridSize * gridSize;
+
+            // Hide overlay
+            const overlay = document.getElementById('game-overlay');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+
+            document.getElementById('current-target').textContent = currentTarget;
+            document.getElementById('header-progress').textContent = `1 / ${total}`;
+
+            // Generate randomized numbers array
+            numbers = Array.from({ length: total }, (_, i) => ({
+                id: i + 1,
+                value: i + 1
+            })).sort(() => Math.random() - 0.5);
+
+            renderGameGrid();
+
+            // Start timer
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                document.getElementById('live-timer').textContent = `${elapsed}s`;
+                document.getElementById('header-timer').textContent = `${elapsed}s`;
+            }, 100);
+
+            // If dynamic mode, setup interval to shuffle unclicked numbers
+            if (mode === 'dynamic') {
+                const intervalTime = parseInt(document.getElementById('dynamic-speed').value) || 1200;
+                dynamicInterval = setInterval(() => {
+                    shuffleUnclickedNumbers();
+                }, intervalTime);
+            }
+        }
+
+        // Render active game grid
+        function renderGameGrid() {
+            const gridEl = document.getElementById('schulte-grid');
+            gridEl.style.gridTemplateColumns = `repeat(${gridSize}, minmax(0, 1fr))`;
+            gridEl.innerHTML = '';
+
+            numbers.forEach((item, index) => {
+                const cell = document.createElement('div');
+                cell.className = "schulte-cell bg-white rounded-2xl border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-xl md:text-2xl shadow-sm cursor-pointer hover:border-indigo-500 hover:shadow-md transition-all";
+                cell.dataset.value = item.value;
+                cell.dataset.index = index;
+                cell.textContent = item.value;
+
+                cell.addEventListener('click', () => handleCellClick(item.value, cell));
+                gridEl.appendChild(cell);
+            });
+        }
+
+        // Shuffle only the numbers that haven't been clicked yet
+        function shuffleUnclickedNumbers() {
+            if (!gameActive) return;
+
+            // Find indices of numbers >= currentTarget
+            const unclickedIndices = [];
+            numbers.forEach((item, idx) => {
+                if (item.value >= currentTarget) {
+                    unclickedIndices.push(idx);
+                }
+            });
+
+            if (unclickedIndices.length <= 1) return;
+
+            // Extract values at those indices
+            const valuesToShuffle = unclickedIndices.map(idx => numbers[idx].value);
+            // Shuffle values
+            valuesToShuffle.sort(() => Math.random() - 0.5);
+
+            // Put back into numbers array
+            unclickedIndices.forEach((idx, i) => {
+                numbers[idx].value = valuesToShuffle[i];
+            });
+
+            renderGameGrid();
+        }
+
+        // Handle cell click logic
+        function handleCellClick(value, cellElement) {
+            if (!gameActive) return;
+
+            if (value === currentTarget) {
+                // Correct click
+                playTone('success');
+                cellElement.classList.add('animate-success', 'bg-emerald-500', 'text-white', 'border-emerald-600');
+                cellElement.style.pointerEvents = 'none';
+
+                currentTarget++;
+                const max = gridSize * gridSize;
+                document.getElementById('current-target').textContent = currentTarget <= max ? currentTarget : '完成!';
+                document.getElementById('header-progress').textContent = `${Math.min(currentTarget - 1, max)} / ${max}`;
+
+                if (currentTarget > max) {
+                    endGame(true);
+                }
+            } else {
+                // Incorrect click
+                playTone('error');
+                cellElement.classList.add('animate-error', 'bg-rose-50', 'text-rose-600', 'border-rose-300');
+                setTimeout(() => {
+                    cellElement.classList.remove('animate-error', 'bg-rose-50', 'text-rose-600', 'border-rose-300');
+                }, 300);
+            }
+        }
+
+        // End Game
+        function endGame(success) {
+            gameActive = false;
+            clearInterval(timerInterval);
+            clearInterval(dynamicInterval);
+
+            const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+
+            if (success) {
+                playTone('complete');
+                saveRecord(gridSize, mode, parseFloat(totalTime));
+                showResultModal(totalTime);
+            }
+        }
+
+        // Modal management
+        function showResultModal(time) {
+            const modal = document.getElementById('result-modal');
+            const modalContent = document.getElementById('result-modal-content');
+            
+            document.getElementById('res-time').textContent = `${time} 秒`;
+            document.getElementById('res-size').textContent = `${gridSize} × ${gridSize}`;
+            document.getElementById('res-mode').textContent = mode === 'dynamic' ? '動態亂序' : '標準數字';
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeResultModal() {
+            const modal = document.getElementById('result-modal');
+            const modalContent = document.getElementById('result-modal-content');
+            
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                resetOverlay();
+            }, 300);
+        }
+
+        function resetOverlay() {
+            const overlay = document.getElementById('game-overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            renderInitialGrid();
+            document.getElementById('live-timer').textContent = '0.0s';
+            document.getElementById('header-timer').textContent = '0.0秒';
+            document.getElementById('current-target').textContent = '1';
+            document.getElementById('header-progress').textContent = `0 / ${gridSize * gridSize}`;
+        }
+
+        // Records LocalStorage Management
+        function saveRecord(size, gameMode, time) {
+            const key = `schulte_rec_${size}_${gameMode}`;
+            const existing = localStorage.getItem(key);
+            if (!existing || time < parseFloat(existing)) {
+                localStorage.setItem(key, time);
+                loadRecords();
+            }
+        }
+
+        function loadRecords() {
+            const r3 = localStorage.getItem('schulte_rec_3_standard');
+            const r4 = localStorage.getItem('schulte_rec_4_standard');
+            const r5s = localStorage.getItem('schulte_rec_5_standard');
+            const r5d = localStorage.getItem('schulte_rec_5_dynamic');
+
+            document.getElementById('rec-3-standard').textContent = r3 ? `${r3}s` : '--';
+            document.getElementById('rec-4-standard').textContent = r4 ? `${r4}s` : '--';
+            document.getElementById('rec-5-standard').textContent = r5s ? `${r5s}s` : '--';
+            document.getElementById('rec-5-dynamic').textContent = r5d ? `${r5d}s` : '--';
+        }
+
+        function clearRecords() {
+            if (confirm('確定要清除所有本地最佳紀錄嗎？')) {
+                localStorage.clear();
+                loadRecords();
+            }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderInitialGrid();
+            loadRecords();
+        };
+    </script>
+
+<!-- === 學障教學大廳：通用浮動返回鈕 === -->
+<style id="floating-lobby-style">
+@media print { .floating-lobby-btn { display: none !important; } }
+.floating-lobby-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #0f172a;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 8px 10px -6px rgba(15, 23, 42, 0.3);
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.floating-lobby-btn:hover {
+  background: #2563eb;
+  color: #ffffff !important;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.floating-lobby-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .floating-lobby-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+</style>
+<a href="index.html" class="floating-lobby-btn" title="返回學障教學大廳首頁" aria-label="返回教學大廳首頁">
+  <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+  <span>返回大廳首頁</span>
+</a>
+
+</body>
+</html>
