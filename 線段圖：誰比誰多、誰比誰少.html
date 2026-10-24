@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>線段圖：誰比誰多、誰比誰少</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1c1c1a;--card:#fff;--bd:#d8d6cf;--blue:#2f6fd0;--org:#d9690f;--grn:#178a4a;--amb:#b7791f;--soft:#eaf1ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171a;--fg:#ececea;--card:#222226;--bd:#3a3a40;--blue:#6ea4ff;--org:#ffa24d;--grn:#4cd68a;--amb:#f0b64a;--soft:#1d2536}}
+:root[data-theme="dark"]{--bg:#17171a;--fg:#ececea;--card:#222226;--bd:#3a3a40;--blue:#6ea4ff;--org:#ffa24d;--grn:#4cd68a;--amb:#f0b64a;--soft:#1d2536}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:.2em 0 .6em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,input{font:inherit;padding:6px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+input{width:4.2em}
+#msg{color:var(--amb);min-height:1.5em;margin:.3em 0 0}
+#q{font-size:1.15rem;font-weight:700}
+#stage.mini{background:var(--soft)}
+svg{width:100%;height:auto;display:block}
+#txt{min-height:5.6em;font-size:1.1rem}
+.m{color:var(--blue);font-weight:700}.h{color:var(--org);font-weight:700}.a{color:var(--amb);font-weight:700}.g{color:var(--grn);font-weight:700}
+#nav{display:flex;gap:10px;align-items:center;justify-content:space-between}
+button{font:inherit;font-size:1.1rem;padding:10px 18px;border-radius:12px;border:2px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer}
+button.alt{background:none;color:var(--blue)}
+button:disabled{opacity:.4;cursor:not-allowed}
+#cnt{font-weight:700}
+.pop{animation:pop .5s ease both}
+@keyframes pop{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.pop{animation:none}}
+</style></head><body><main>
+<div class="no-print" style="margin-bottom:14px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#2f6fd0;text-decoration:none;font-weight:bold;padding:5px 12px;background:#eaf1ff;border-radius:8px;border:1px solid #c2d9ff;box-shadow:0 1px 2px rgba(0,0,0,0.05)">🏠 返回教學大廳首頁</a></div>
+<h1>📏 線段圖：誰比誰多、誰比誰少</h1>
+<div class="card"><div class="row">
+<select id="unk"><option value="華">求小華</option><option value="明">求小明</option></select>
+<span>已知的人有</span><input id="k" type="number" value="12" min="1" max="50">
+<span>個，小華比小明</span>
+<select id="rel"><option>多</option><option>少</option></select>
+<input id="d" type="number" value="5" min="1" max="50"><span>個</span>
+</div><p id="msg"></p></div>
+<div class="card" id="q"></div>
+<div class="card" id="stage"><svg id="svg" viewBox="0 0 640 260" role="img" aria-label="線段圖"></svg></div>
+<div class="card" id="txt"></div>
+<div id="nav"><button id="pv" class="alt">◀ 上一步</button><span id="cnt"></span><button id="nx">下一步 ▶</button></div>
+<div class="card" style="margin-top:14px"><button id="pdf" class="alt">🖨 產生作業單 PDF（學生頁＋解答頁）</button> <small id="dlnote"></small></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const N={明:'小明',華:'小華'},C={b:'var(--blue)',o:'var(--org)',g:'var(--grn)',a:'var(--amb)'};
+const STEPS=['read','mini','base','other','diff','calc','ans'];
+let Q,step=0,last=0,sub=0,lastSub=0,DL=null;
+const nm=p=>`<span class="${p==='明'?'m':'h'}">${N[p]}</span>`;
+
+function build(){
+  const unk=$('unk').value,rel=$('rel').value,k=+$('k').value,d=+$('d').value,msg=$('msg');
+  msg.textContent='';
+  if(!Number.isInteger(k)||!Number.isInteger(d)||k<1||d<1||k>50||d>50){msg.textContent='請輸入 1 到 50 的整數。';return false}
+  let ming,hua;
+  if(unk==='華'){ming=k;hua=rel==='多'?k+d:k-d}else{hua=k;ming=rel==='多'?k-d:k+d}
+  if(Math.min(ming,hua)<1){msg.textContent='算出來會是 0 或負數，請把「'+rel+'」的數字改小一點。';return false}
+  const known=unk==='華'?'明':'華',long=rel==='多'?'華':'明',short=long==='華'?'明':'華',longUnk=unk===long;
+  Q={unk,rel,k,d,ming,hua,known,long,short,longUnk,op:longUnk?'+':'−',ans:unk==='華'?hua:ming,
+     text:`${N[known]}有 ${k} 個蘋果，小華比小明${rel} ${d} 個，${N[unk]}有幾個蘋果？`};
+  return true;
+}
+
+function mainSvg(i,fwd){
+  const {ming,hua,d,unk,rel,long,short}=Q,V={明:ming,華:hua},Y={明:70,華:150},col={明:C.b,華:C.o};
+  const X=110,S=500/Math.max(ming,hua);
+  const pop=(n,h)=>`<g class="${fwd&&i===n?'pop':''}">${h}</g>`;
+  const bar=p=>{
+    const w=V[p]*S,rev=p===unk&&i>=6,solid=p!==unk||rev,f=rev?C.g:col[p];
+    const cw=(p===long&&i>=4)?V[short]*S:w;
+    return `<text x="12" y="${Y[p]+28}" font-size="22" fill="var(--fg)">${N[p]}</text>
+<rect x="${X}" y="${Y[p]}" width="${w}" height="40" rx="6" fill="${solid?f:'none'}" fill-opacity=".9" stroke="${f}" stroke-width="3" ${solid?'':'stroke-dasharray="8 6"'}/>
+<text x="${X+cw/2}" y="${Y[p]+28}" font-size="22" font-weight="700" text-anchor="middle" fill="${solid?'#fff':f}">${solid?V[p]:'?'}</text>`;
+  };
+  let o='';
+  if(i>=2)o+=pop(2,bar('明'));
+  if(i>=3)o+=pop(3,bar('華'));
+  if(i>=4){
+    const x1=X+V[short]*S,x2=X+V[long]*S;
+    o+=pop(4,`<line x1="${x1}" x2="${x1}" y1="${Y.明-10}" y2="${Y.華+50}" stroke="${C.a}" stroke-width="2" stroke-dasharray="5 4"/>
+<rect x="${x1}" y="${Y[long]}" width="${x2-x1}" height="40" rx="4" fill="${C.a}" fill-opacity=".95"/>
+<text x="${(x1+x2)/2}" y="${Y[long]+28}" font-size="22" font-weight="700" text-anchor="middle" fill="#fff">${d}</text>
+<text x="320" y="235" font-size="22" text-anchor="middle" fill="${C.a}">小華比小明${rel}的這一段 = ${d}</text>`);
+  }
+  return o;
+}
+
+function miniSvg(s){
+  const U=50,X=110;
+  const row=(y,l,v,c,t,dash)=>`<text x="12" y="${y+28}" font-size="22" fill="var(--fg)">${l}</text><rect x="${X}" y="${y}" width="${v*U}" height="40" rx="6" fill="${dash?'none':c}" fill-opacity=".9" stroke="${c}" stroke-width="3" ${dash?'stroke-dasharray="8 6"':''}/><text x="${X+v*U/2}" y="${y+28}" font-size="22" font-weight="700" text-anchor="middle" fill="${dash?c:'#fff'}">${t}</text>`;
+  const gap=(y,t,hollow)=>`<rect x="${X+6*U}" y="${y}" width="${3*U}" height="40" rx="4" fill="${hollow?'none':C.a}" stroke="${C.a}" stroke-width="3" ${hollow?'stroke-dasharray="6 5"':''}/><text x="${X+7.5*U}" y="${y+28}" font-size="22" font-weight="700" text-anchor="middle" fill="${hollow?C.a:'#fff'}">${t}</text>`;
+  const guide=`<line x1="${X+6*U}" x2="${X+6*U}" y1="70" y2="225" stroke="${C.a}" stroke-width="2" stroke-dasharray="5 4"/>`;
+  const T=(y,t,c)=>`<text x="320" y="${y}" font-size="24" font-weight="700" text-anchor="middle" fill="${c||'var(--fg)'}">${t}</text>`;
+  if(s===0)return T(40,'小華比小明「多」3 → 小華比較長')+row(90,'小明',6,C.b,6)+row(170,'小華',9,C.o,9)+guide+gap(170,'多 3');
+  if(s===1)return T(40,'小華比小明「少」3 → 小華比較短')+row(90,'小明',9,C.b,9)+row(170,'小華',6,C.o,6)+guide+gap(170,'少 3',1);
+  if(s===2)return T(40,'「比」後面的人是基準，先畫他')+row(90,'小明',6,C.b,6)+row(170,'小華',9,C.o,'？再畫',1)
+    +`<text x="${X+6*U+14}" y="118" font-size="22" font-weight="700" fill="${C.a}">← ① 先畫</text>`+T(260,'比 → 後面的人 = 基準','var(--amb)');
+  return T(40,'長短決定加或減')+row(90,'小明',6,C.b,'短')+row(170,'小華',9,C.o,'長')+guide
+    +T(270,'要求「長」的 → 短 ＋ 差（加）',C.g)+T(310,'要求「短」的 → 長 − 差（減）',C.g);
+}
+const MT=['「小華比小明<b>多</b>」→ 小華的線段<b>比較長</b>，多出來的 3 用<span class="a">琥珀色</span>標出。',
+'「小華比小明<b>少</b>」→ 小華的線段<b>比較短</b>，少的 3 用虛線框標出。',
+'「小華比<b>小明</b>多（少）」：「比」字後面的人是基準，<b>先畫他</b>，再畫另一個人。',
+'口訣：要求的是<b>長</b>的 → 用<b>加</b>；要求的是<b>短</b>的 → 用<b>減</b>。'];
+
+function text(i){
+  const {unk,known,rel,d,k,ans,long,longUnk,op,ming,hua}=Q,r=`<span class="a">${rel}</span>`;
+  switch(STEPS[i]){
+    case'read':return `找出三件事：<br>① 已知：${nm(known)}有 <b>${k}</b> 個。<br>② 關係：小華比小明 ${r} ${d} 個。<br>③ 要求：${nm(unk)}有幾個。`;
+    case'base':return `先畫「比」後面的人：${nm('明')}。<br>`+(unk==='明'?'還不知道有幾個，先用「？」代替。':`有 ${ming} 個，畫一條線段。`);
+    case'other':return `${nm('華')}比${nm('明')}${r}，所以${nm('華')}的線段要比較<b>${rel==='多'?'長':'短'}</b>。<br>`+(unk==='華'?'還不知道有幾個，先用「？」代替。':`有 ${hua} 個，照著畫出來。`);
+    case'diff':return `長的比短的多出來的這一段，就是「${rel} ${d}」。<br><span class="a">琥珀色這段 = ${d}</span>`;
+    case'calc':return `要求的${nm(unk)}是<b>${longUnk?'長':'短'}</b>的 → 用<b>${longUnk?'加':'減'}</b>。<br><span class="g">${k} ${op} ${d} = ${ans}</span>`;
+    case'ans':return `答：${nm(unk)}有 <span class="g">${ans}</span> 個。<br>驗算：小華 ${hua}、小明 ${ming}，小華比小明${rel} ${Math.abs(hua-ming)} ✓`;
+  }
+}
+
+function render(){
+  const mini=STEPS[step]==='mini';
+  $('stage').classList.toggle('mini',mini);
+  $('q').textContent=Q.text;
+  const svg=$('svg');
+  if(mini){
+    svg.setAttribute('viewBox','0 0 640 330');
+    svg.innerHTML=`<g class="${sub>lastSub?'pop':''}">${miniSvg(sub)}</g>`;
+    $('txt').innerHTML=MT[sub];
+    $('cnt').textContent=`小教室 ${sub+1} / 4`;
+    $('pv').textContent=sub===0?'◀ 回上一步':'◀ 小教室上一步';
+    $('nx').textContent=sub===3?'回主流程 ▶':'小教室下一步 ▶';
+  }else{
+    svg.setAttribute('viewBox','0 0 640 260');
+    svg.innerHTML=mainSvg(step,step>last);
+    $('txt').innerHTML=text(step);
+    $('cnt').textContent=`第 ${step+1} / ${STEPS.length} 步`;
+    $('pv').textContent='◀ 上一步';$('nx').textContent='下一步 ▶';
+  }
+  $('pv').disabled=step===0;$('nx').disabled=step===STEPS.length-1;
+}
+function go(dx){
+  if(STEPS[step]==='mini'){const ns=sub+dx;if(ns>=0&&ns<=3){lastSub=sub;sub=ns;render();return}}
+  const ns=step+dx;if(ns<0||ns>=STEPS.length)return;
+  last=step;step=ns;
+  if(STEPS[step]==='mini'){sub=dx>0?0:3;lastSub=sub}
+  render();
+}
+function reset(){if(build()){step=0;last=0;sub=0;lastSub=0;render();checkPdf()}}
+['unk','rel','k','d'].forEach(id=>$(id).addEventListener('input',reset));
+$('pv').onclick=()=>go(-1);$('nx').onclick=()=>go(1);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1)});
+
+/* ---- 作業單 PDF ---- */
+const F='"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",sans-serif';
+async function sheet(ans){
+  try{await document.fonts.load(`40px ${F}`,'線段圖')}catch(e){}
+  const W=1654,H=2339,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const R='#d33',{k,d,ming,hua,unk,known,rel,op,ans:A,long,short}=Q;
+  const T=(s,px,X,Y,col,al,b)=>{x.font=`${b||''}${px}px ${F}`;x.fillStyle=col||'#000';x.textAlign=al||'left';x.fillText(s,X,Y)};
+  x.fillStyle='#fff';x.fillRect(0,W,H);
+  T('線段圖應用題作業單'+(ans?'（解答）':''),64,110,150,ans?R:'#000','left','bold ');
+  T('班級＿＿＿＿　座號＿＿＿　姓名＿＿＿＿＿＿　日期＿＿＿＿＿＿',34,110,225);
+  T('題目：'+Q.text,40,110,330);
+  const line=(Y,parts)=>{let px=150;for(const p of parts){if(typeof p==='string'){T(p,40,px,Y);px+=x.measureText(p).width}else{x.strokeStyle='#000';x.lineWidth=3;x.beginPath();x.moveTo(px+6,Y+6);x.lineTo(px+186,Y+6);x.stroke();if(ans)T(p.a,40,px+96,Y-2,R,'center');px+=200}}};
+  T('一、找出已知和要求的',42,110,440,'#000','left','bold ');
+  line(510,['已知：',{a:N[known]},'有 '+k+' 個；要求：',{a:N[unk]},'。']);
+  T('二、畫線段圖（要求的用「？」表示）',42,110,620,'#000','left','bold ');
+  const M=Math.max(ming,hua),U=1000/M,X0=330,Yb={明:720,華:900},V={明:ming,華:hua};
+  for(const p of['明','華']){
+    T(N[p],40,120,Yb[p]+55);
+    x.strokeStyle='#bbb';x.lineWidth=2;
+    for(let j=0;j<=M;j++){x.beginPath();x.moveTo(X0+j*U,Yb[p]+80);x.lineTo(X0+j*U,Yb[p]+(j%5?90:100));x.stroke()}
+    x.setLineDash([8,8]);x.beginPath();x.moveTo(X0,Yb[p]-20);x.lineTo(X0,Yb[p]+80);x.stroke();x.setLineDash([]);
+    if(ans){const q=p===unk;x.strokeStyle=R;x.lineWidth=5;x.setLineDash(q?[14,10]:[]);x.strokeRect(X0,Yb[p],V[p]*U,70);x.setLineDash([]);
+      T(q?'？':String(V[p]),40,X0+Math.min(V[p],V[short])*U/2,Yb[p]+48,R,'center');
+      if(p===long){x.fillStyle='rgba(211,51,51,.18)';x.fillRect(X0+V[short]*U,Yb[p],(V[long]-V[short])*U,70);T(rel+' '+d,40,X0+(V[short]+V[long])*U/2,Yb[p]+48,R,'center')}}
+  }
+  T('三、列式計算',42,110,1230,'#000','left','bold ');
+  x.strokeStyle='#000';x.lineWidth=3;x.strokeRect(150,1270,900,170);T('算式：',34,165,1315,'#555');
+  if(ans)T(`${k} ${op} ${d} = ${A}`,60,260,1400,R);
+  T('四、寫出答案',42,110,1560,'#000','left','bold ');
+  line(1640,['答：',{a:N[unk]},'有',{a:String(A)},'個。']);
+  return c;
+}
+async function dl(){
+  if(!DL||!window.jspdf)return;
+  const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'});
+  doc.addImage((await sheet(false)).toDataURL('image/png'),'PNG',0,0,210,297);
+  doc.addPage();doc.addImage((await sheet(true)).toDataURL('image/png'),'PNG',0,0,210,297);
+  try{await DL.save({filename:`線段圖作業單_${N[Q.known]}${Q.k}_小華比小明${Q.rel}${Q.d}.pdf`,data:doc.output('blob')})}catch(e){}
+}
+function checkPdf(){const b=$('pdf');b.disabled=!(DL&&window.jspdf);$('dlnote').textContent=DL?'':'（目前環境無法下載，請在 Claude 網頁版開啟）'}
+$('pdf').onclick=dl;
+try{(window.claude&&claude.use?claude.use('downloads'):Promise.resolve(null)).then(v=>{DL=v;checkPdf()}).catch(()=>checkPdf())}catch(e){}
+reset();checkPdf();
+</script>
+<!-- === 學障教學大廳：通用浮動返回鈕 === -->
+<style id="floating-lobby-style">
+@media print { .floating-lobby-btn { display: none !important; } }
+.floating-lobby-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #0f172a;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 8px 10px -6px rgba(15, 23, 42, 0.3);
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.floating-lobby-btn:hover {
+  background: #2563eb;
+  color: #ffffff !important;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.floating-lobby-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .floating-lobby-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+</style>
+<a href="index.html" class="floating-lobby-btn" title="返回學障教學大廳首頁" aria-label="返回教學大廳首頁">
+  <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+  <span>返回大廳首頁</span>
+</a>
+
+</body></html>
