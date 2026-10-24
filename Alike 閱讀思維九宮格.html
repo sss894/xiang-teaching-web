@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alike 動畫閱讀理解：觀察・推論・找證據</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for High Legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom scrollbar for textareas */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        /* Bingo animation */
+        @keyframes bingoCelebration {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .bingo-banner-anim {
+            animation: bingoCelebration 0.4s ease-out forwards;
+        }
+        /* High contrast focus ring for accessibility */
+        textarea:focus, input:focus, button:focus {
+            outline: 2px solid #0284c7;
+            outline-offset: 1px;
+        }
+    </style>
+</head>
+<body class="bg-amber-50/50 min-h-screen text-slate-800 p-3 sm:p-5 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- 頂部學習目標與鷹架指引區 -->
+        <header class="bg-white rounded-3xl shadow-md border-2 border-sky-150 p-5 md:p-7 mb-6 transition-all">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-900 text-xs md:text-sm font-bold rounded-full border border-amber-300">
+                        特教適性閱讀資源 ｜ 認知鷹架
+                    </span>
+                    <span class="px-3 py-1 bg-sky-150 text-sky-800 bg-sky-100 text-xs md:text-sm font-semibold rounded-full">
+                        西班牙動畫短片《Alike》
+                    </span>
+                </div>
+                <!-- 語音指引按鈕 -->
+                <a href="index.html" class="no-print inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold border border-slate-300 shadow-sm transition active:scale-95 mr-2"><span>🏠 返回大廳</span></a>
+                <button onclick="readHeaderInstructions()" class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-sm font-bold shadow-sm transition active:scale-95">
+                    <span>🔊 朗讀學習目標與玩法</span>
+                </button>
+            </div>
+
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight mb-2">
+                🎬 《Alike 大同小異》閱讀思維九宮格
+            </h1>
+            <p class="text-slate-600 text-base md:text-lg mb-4 font-normal">
+                這不是單純寫答案，讓我們像大偵探一樣，練習「<span class="text-emerald-700 font-bold">1. 仔細觀察</span> ➔ <span class="text-blue-700 font-bold">2. 合理推論</span> ➔ <span class="text-purple-700 font-bold">3. 尋找線索證據</span>」的三步驟思考！
+            </p>
+
+            <!-- 思考三步驟視覺卡片 -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-150">
+                <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl">
+                    <div class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shrink-0">1</div>
+                    <div>
+                        <div class="text-xs font-bold text-emerald-800">觀察 (Observation)</div>
+                        <div class="text-xs text-emerald-600">看角色的動作、眼神、臉色與環境</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 bg-blue-50 border border-blue-200 p-2.5 rounded-xl">
+                    <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0">2</div>
+                    <div>
+                        <div class="text-xs font-bold text-blue-800">推論 (Inference)</div>
+                        <div class="text-xs text-blue-600">想想角色的心情感受與事情原因</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 bg-purple-50 border border-purple-200 p-2.5 rounded-xl">
+                    <div class="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-lg shrink-0">3</div>
+                    <div>
+                        <div class="text-xs font-bold text-purple-800">找證據 (Evidence)</div>
+                        <div class="text-xs text-purple-600">從畫面找出證明自己想法的細節</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 狀態列：分頁切換 + 完成進度 + 連線 (Bingo) 狀態提示 -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <!-- 分頁切換鈕 -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl self-start">
+                <button id="tab-grid-btn" onclick="switchTab('grid')" class="px-4 py-2 rounded-lg font-bold text-sm bg-white text-sky-700 shadow-xs transition">
+                    🧩 九宮格挑戰模式
+                </button>
+                <button id="tab-overview-btn" onclick="switchTab('overview')" class="px-4 py-2 rounded-lg font-bold text-sm text-slate-600 hover:text-slate-900 transition">
+                    📖 觀察-推論-證據 筆記總覽
+                </button>
+            </div>
+
+            <!-- 連線與進度提示 -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div id="bingo-badge" class="hidden px-3.5 py-1.5 bg-gradient-to-r from-amber-400 to-orange-400 text-amber-950 font-black rounded-xl text-sm shadow-sm flex items-center gap-1.5 bingo-banner-anim">
+                    🎉 太棒了！已達成九宮格連線 Bingo！
+                </div>
+                <div class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold flex items-center gap-2">
+                    <span>進度：</span>
+                    <span id="progress-text" class="text-sky-700 font-extrabold text-base">0 / 9 格</span>
+                    <span id="line-count" class="text-xs text-slate-500 font-normal">（連線：0 條）</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模式一：九宮格挑戰視圖 -->
+        <main id="view-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4.5 mb-8">
+            <!-- 9 個九宮格項目由 JavaScript 自動結構化渲染，以確保精確支援各格專屬題幹、三步提示與詞庫 -->
+        </main>
+
+        <!-- 模式二：結構化閱讀筆記總覽視圖 -->
+        <section id="view-overview" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8">
+            <div class="flex items-center justify-between border-b pb-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">📋 學生思維筆記清單</h2>
+                    <p class="text-slate-500 text-sm mt-1">此頁面將 9 格內容依序整理為條列式文本，可隨時檢閱或做個別指導。</p>
+                </div>
+                <button onclick="switchTab('grid')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold">
+                    返回九宮格 ↩
+                </button>
+            </div>
+            <div id="overview-content" class="space-y-4">
+                <!-- 條列式內容動態填入 -->
+            </div>
+        </section>
+
+        <!-- 學生資訊填寫與產出報告區 -->
+        <footer class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 md:p-7">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div class="flex flex-wrap items-center gap-3">
+                    <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                        <span>👤 姓名：</span>
+                        <input type="text" id="student-name" placeholder="請輸入姓名" class="border border-slate-300 rounded-xl px-3 py-2 text-sm w-36 md:w-44 focus:border-sky-500">
+                    </label>
+                    <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                        <span>🏷️ 座號：</span>
+                        <input type="text" id="student-number" placeholder="座號" class="border border-slate-300 rounded-xl px-3 py-2 text-sm w-20 focus:border-sky-500">
+                    </label>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button onclick="resetAllFields()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition">
+                        🔄 清空重做
+                    </button>
+                    <button onclick="previewReportModal()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-sm font-bold shadow-md shadow-sky-600/20 transition active:scale-95 flex items-center gap-2">
+                        <span>📄 產出 IEP / 閱讀評量報告</span>
+                    </button>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- 彈跳視窗：報告檢視與複製 (Modal) -->
+    <div id="report-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-5 z-50">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[92vh] flex flex-col border border-slate-200">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📝</span>
+                    <h3 class="text-lg md:text-xl font-bold text-slate-800">《Alike》閱讀理解三步思維學習報告</h3>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-lg flex items-center justify-center transition">&times;</button>
+            </div>
+            
+            <div class="overflow-y-auto py-4 pr-1 grow space-y-3">
+                <p class="text-xs text-slate-500">此格式已轉換為支持 IEP 個別化教育評量或課堂檔案評量之格式，可直接複製列印。</p>
+                <div id="modal-report-text" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-slate-800 text-sm leading-relaxed whitespace-pre-wrap font-mono">
+                    <!-- 生成的純文字報告內容 -->
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 flex justify-between items-center shrink-0">
+                <span id="copy-status" class="text-xs font-semibold text-emerald-600 hidden">✅ 內容已成功複製到剪貼簿！</span>
+                <div class="flex items-center gap-3 ml-auto">
+                    <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold">
+                        關閉視窗
+                    </button>
+                    <button onclick="copyReportText()" class="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-sm font-bold shadow-sm transition active:scale-95">
+                        📋 一鍵複製給老師
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 內建提示音效（Tone.js 支援無外源安全音效） -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        // 九宮格題目定義：結合「觀察 - 推論 - 找證據」
+        const gridQuestions = [
+            {
+                id: 1,
+                step: "步驟 1：觀察細節",
+                badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                stepType: "observe",
+                question: "【人物與情境觀察】在灰色冰冷的城市街道上，大人們和小男孩的「步伐動作」與「臉部表情」有什麼明顯差別？",
+                hint: {
+                    observeTips: "仔細看大人走路時低著頭、直直往前走；而小男孩走走跳跳、左顧右盼。",
+                    sentenceFrame: "我觀察到大人走路時……（臉上表情……）；而小男孩則會……，顯得很不一樣。"
+                },
+                keywords: ["面無表情", "腳步沉重", "東張西望", "活潑跳躍", "灰色冷清"]
+            },
+            {
+                id: 2,
+                step: "步驟 2：推論感受",
+                badgeColor: "bg-blue-100 text-blue-800 border-blue-300",
+                stepType: "infer",
+                question: "【內心推論】小男孩看見路旁演奏小提琴的街頭藝人時，他的身體為什麼會突然亮起鮮豔的光芒？",
+                hint: {
+                    observeTips: "色彩在片中象徵「熱情、創造力與快樂」。小男孩聽見音樂時眼睛睜大、身體也亮了起來。",
+                    sentenceFrame: "小男孩的身體亮起來，我推論那是因為音樂給了他……，讓他感受到……的快樂。"
+                },
+                keywords: ["感受到快樂", "眼睛發亮", "充滿熱情", "被音樂吸引", "靈感啟發"]
+            },
+            {
+                id: 3,
+                step: "步驟 3：尋找證據",
+                badgeColor: "bg-purple-100 text-purple-800 border-purple-300",
+                stepType: "evidence",
+                question: "【畫面找證據】在學校上課時，從哪些具體的畫面細節可以證明「學校的規矩和小男孩的天真起衝突」？",
+                hint: {
+                    observeTips: "找找看作業本上的字母練習、老師對彩繪畫作的反應，以及小男孩最後如何修改作品。",
+                    sentenceFrame: "我找到的畫面證據是：老師要求學生寫……，但小男孩畫了……，結果老師指著作業本要他……。"
+                },
+                keywords: ["字母作業簿", "畫出樂手", "被老師要求擦掉", "按照規格寫字", "收起畫筆"]
+            },
+            {
+                id: 4,
+                step: "步驟 1：觀察變化",
+                badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                stepType: "observe",
+                question: "【身體姿態觀察】爸爸在辦公室堆積如山的文件前工作時，他的「背脊形狀」與「周圍顏色」發生了什麼變化？",
+                hint: {
+                    observeTips: "看爸爸蓋印章時，背部是不是越來越駝？整個人變得越來越扁平？",
+                    sentenceFrame: "我觀察到爸爸坐在辦公桌前，背部慢慢變得……，身體的顏色也漸漸褪成……。"
+                },
+                keywords: ["背部駝曲", "身體變得沉重", "褪成暗灰色", "機械式蓋印章", "精神疲憊"]
+            },
+            {
+                id: 5,
+                step: "🌟 中心格：推論與自我連結",
+                badgeColor: "bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-400",
+                stepType: "infer",
+                question: "【核心推論】當小男孩最後也變成灰白色、連最愛的畫畫都放棄時，他失去了什麼？如果是你，你會怎麼做？",
+                hint: {
+                    observeTips: "小男孩把書包隨手丟在地上，不再歡笑。思考：當一個人只配合別人的標準時，會失去什麼？",
+                    sentenceFrame: "我推論小男孩失去了……；如果是現在的我，我會嘗試……（例如找爸爸談談、保留畫畫的興趣）。"
+                },
+                keywords: ["失去好奇心", "失去笑容", "變成灰白色", "找爸爸抱抱", "堅持自己的熱愛"]
+            },
+            {
+                id: 6,
+                step: "步驟 3：尋找證據",
+                badgeColor: "bg-purple-100 text-purple-800 border-purple-300",
+                stepType: "evidence",
+                question: "【舉動找證據】從哪一個眼神或肢體動作可以看出爸爸「終於驚覺自己抹煞了孩子的活力」？",
+                hint: {
+                    observeTips: "注意爸爸把白紙遞給小男孩時，小男孩的反應；以及爸爸看著孩子低垂雙肩時的表情。",
+                    sentenceFrame: "支持這點的畫面證據是：當爸爸把……遞給兒子時，兒子卻……，爸爸臉上露出……的驚訝表情。"
+                },
+                keywords: ["遞出空白紙張", "小男孩默默轉身", "爸爸眼神震驚", "看著孩子低頭", "心疼抱緊"]
+            },
+            {
+                id: 7,
+                step: "步驟 2：推論心理",
+                badgeColor: "bg-blue-100 text-blue-800 border-blue-300",
+                stepType: "infer",
+                question: "【動機推論】在故事後半段，爸爸為什麼主動牽起小男孩的手，快步奔向那棵樹下？爸爸的內心做出了什麼選擇？",
+                hint: {
+                    observeTips: "爸爸原本總是不斷拉著小男孩趕時間，這次換成爸爸牽著小男孩小跑。",
+                    sentenceFrame: "爸爸之所以帶小男孩回到樹下，我推論是因為爸爸明白比起成規，孩子的……更重要，他想幫孩子找回……。"
+                },
+                keywords: ["找回笑容", "奔向樹下", "不再急著趕路", "重視孩子的感受", "打破生活的框架"]
+            },
+            {
+                id: 8,
+                step: "步驟 1：觀察結局動作",
+                badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                stepType: "observe",
+                question: "【高潮觀察】當兩人到達樹下卻發現街頭藝人不見時，爸爸做出了什麼出乎意料的舉動？兩人的色彩如何變化？",
+                hint: {
+                    observeTips: "爸爸在樹下站在原地，接著深吸一口氣，開始假裝自己在彈奏小提琴...",
+                    sentenceFrame: "我觀察到爸爸竟然親自……，接著小男孩笑了，兩個人的顏色瞬間變成了……！"
+                },
+                keywords: ["閉上眼睛拉琴", "笨拙地模仿樂手", "發出笑聲", "綻放鮮艷橙藍色", "深情擁抱"]
+            },
+            {
+                id: 9,
+                step: "步驟 3：總結意旨與證據",
+                badgeColor: "bg-purple-100 text-purple-800 border-purple-300",
+                stepType: "evidence",
+                question: "【核心證據】如果片名《Alike》（大同小異）是想反思『每個人都被模子塑造成一模一樣』，片尾哪一個畫面是最佳佐證？",
+                hint: {
+                    observeTips: "可以回想兩人在灰濛濛的冷漠人群中，擁抱發光的那一幕。",
+                    sentenceFrame: "我認為最有力的畫面證據是：當四周的人都……時，爸爸和小男孩卻透過……，展現出與眾不同的光彩。"
+                },
+                keywords: ["滿街灰色人群", "獨自發光擁抱", "拒絕被同化", "擁抱自己的顏色", "愛與陪伴"]
+            }
+        ];
+
+        // 頁面初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            renderGrid();
+            updateProgress();
+        });
+
+        // 渲染九宮格元件
+        function renderGrid() {
+            const container = document.getElementById('view-grid');
+            container.innerHTML = '';
+
+            gridQuestions.forEach((item) => {
+                const card = document.createElement('article');
+                card.id = `grid-card-${item.id}`;
+                card.className = "bg-white rounded-2xl border-2 border-slate-200 p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md transition duration-200 relative";
+                
+                // 題幹與步驟標籤
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-1 mb-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${item.badgeColor}">
+                                ${item.step}
+                            </span>
+                            <div class="flex items-center gap-1">
+                                <button onclick="toggleHint(${item.id})" class="px-2 py-0.5 bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold rounded-lg transition" title="展開/收合提示">
+                                    💡 提示
+                                </button>
+                                <button onclick="speakQuestion(${item.id})" class="px-2 py-0.5 text-sky-700 hover:text-sky-900 hover:bg-sky-50 text-xs font-bold rounded-lg transition" title="朗讀題目">
+                                    🔊 讀題
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-800 font-bold text-sm md:text-base leading-snug mb-3">
+                            ${item.question}
+                        </p>
+
+                        <!-- 隱藏式鷹架提示區（特教友善：點擊提示按鈕才同時展開思考撇步、句型與詞庫按鈕） -->
+                        <div id="hint-box-${item.id}" class="hidden mb-3 p-3 bg-amber-50/90 border border-amber-200 rounded-xl text-xs space-y-2.5">
+                            <div>
+                                <span class="font-bold text-amber-900 block mb-0.5">🔍 思考小撇步：</span>
+                                <span class="text-amber-800 leading-relaxed">${item.hint.observeTips}</span>
+                            </div>
+                            <div class="pt-2 border-t border-amber-200/70">
+                                <span class="font-bold text-amber-900 block mb-0.5">💬 句型鷹架參考：</span>
+                                <span class="text-amber-800 italic leading-relaxed">${item.hint.sentenceFrame}</span>
+                            </div>
+                            <!-- 詞彙庫移入提示區塊內，避免一開始干擾或造成認知負載 -->
+                            <div class="pt-2 border-t border-amber-200/70">
+                                <span class="font-bold text-amber-900 block mb-1">🏷️ 點選詞語加入答案：</span>
+                                <div class="flex flex-wrap gap-1">
+                                    ${item.keywords.map(kw => `
+                                        <button type="button" onclick="insertKeyword(${item.id}, '${kw}')" class="px-2 py-0.5 bg-white hover:bg-sky-100 text-slate-700 hover:text-sky-800 text-xs font-medium rounded-md transition active:scale-95 border border-amber-200 shadow-2xs">
+                                            +${kw}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 作答輸入區：預設純淨無干擾 -->
+                    <div>
+                        <textarea 
+                            id="answer-${item.id}" 
+                            oninput="onAnswerInput(${item.id})"
+                            rows="3" 
+                            class="w-full p-2.5 text-sm md:text-base text-slate-800 bg-slate-50/50 border border-slate-300 rounded-xl focus:bg-white resize-none transition" 
+                            placeholder="在此輸入你的想法與觀察..."></textarea>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // 展開/收合提示
+        function toggleHint(id) {
+            const box = document.getElementById(`hint-box-${id}`);
+            box.classList.toggle('hidden');
+        }
+
+        // 插入詞彙至 textarea
+        function insertKeyword(id, word) {
+            const textarea = document.getElementById(`answer-${id}`);
+            const curVal = textarea.value;
+            if (curVal.length > 0 && !curVal.endsWith(' ') && !curVal.endsWith('，') && !curVal.endsWith('、')) {
+                textarea.value = curVal + '、' + word;
+            } else {
+                textarea.value = curVal + word;
+            }
+            textarea.focus();
+            onAnswerInput(id);
+        }
+
+        // 文字輸入監聽
+        function onAnswerInput(id) {
+            updateProgress();
+            checkLines();
+        }
+
+        // 更新完成進度與狀態
+        function updateProgress() {
+            let completed = 0;
+            for (let i = 1; i <= 9; i++) {
+                const ta = document.getElementById(`answer-${i}`);
+                const card = document.getElementById(`grid-card-${i}`);
+                if (ta && ta.value.trim().length >= 4) { // 稍微有作答內容
+                    completed++;
+                    if (card) {
+                        card.classList.remove('border-slate-200');
+                        card.classList.add('border-sky-300', 'bg-sky-50/20');
+                    }
+                } else if (card) {
+                    card.classList.remove('border-sky-300', 'bg-sky-50/20');
+                    card.classList.add('border-slate-200');
+                }
+            }
+            document.getElementById('progress-text').innerText = `${completed} / 9 格`;
+            checkLines();
+        }
+
+        // 判斷九宮格連線 (Bingo)
+        function checkLines() {
+            const states = [];
+            for (let i = 1; i <= 9; i++) {
+                const val = document.getElementById(`answer-${i}`)?.value.trim() || '';
+                states[i] = val.length >= 4;
+            }
+
+            // 8 種連線組合
+            const winningLines = [
+                [1, 2, 3], [4, 5, 6], [7, 8, 9], // 橫向
+                [1, 4, 7], [2, 5, 8], [3, 6, 9], // 縱向
+                [1, 5, 9], [3, 5, 7]             // 對角
+            ];
+
+            let lineCount = 0;
+            winningLines.forEach(line => {
+                if (states[line[0]] && states[line[1]] && states[line[2]]) {
+                    lineCount++;
+                }
+            });
+
+            document.getElementById('line-count').innerText = `（連線：${lineCount} 條）`;
+
+            const bingoBadge = document.getElementById('bingo-badge');
+            if (lineCount > 0) {
+                if (bingoBadge.classList.contains('hidden')) {
+                    bingoBadge.classList.remove('hidden');
+                    playToneCelebration();
+                }
+            } else {
+                bingoBadge.classList.add('hidden');
+            }
+        }
+
+        // 溫和的完成音效 (Tone.js Synth)
+        function playToneCelebration() {
+            try {
+                if (window.Tone) {
+                    Tone.start();
+                    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                    synth.volume.value = -8;
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "8n", now);
+                    synth.triggerAttackRelease("E5", "8n", now + 0.15);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.3);
+                    synth.triggerAttackRelease("C6", "4n", now + 0.45);
+                }
+            } catch (e) {
+                // Ignore audio context errors if browser blocks autoplay
+            }
+        }
+
+        // 語音朗讀題目 (Web Speech API)
+        function speakQuestion(id) {
+            const qObj = gridQuestions.find(q => q.id === id);
+            if (!qObj) return;
+            const fullText = `${qObj.step}。${qObj.question}`;
+            speakMandarin(fullText);
+        }
+
+        function readHeaderInstructions() {
+            const intro = "歡迎來到《Alike 大同小異》閱讀思維九宮格。目標是培養：觀察、推論、找證據的三步驟能力。你可以自由選擇格子回答，每格都配有語音朗讀、思考撇步與提示句型，完成三格連線就算過關！";
+            speakMandarin(intro);
+        }
+
+        function speakMandarin(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // 停止先前的朗讀
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-TW';
+                utterance.rate = 0.85; // 稍微放慢語速，便於特教學童吸收
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // 切換視圖（九宮格 / 筆記總覽）
+        function switchTab(tab) {
+            const viewGrid = document.getElementById('view-grid');
+            const viewOverview = document.getElementById('view-overview');
+            const btnGrid = document.getElementById('tab-grid-btn');
+            const btnOverview = document.getElementById('tab-overview-btn');
+
+            if (tab === 'grid') {
+                viewGrid.classList.remove('hidden');
+                viewOverview.classList.add('hidden');
+                btnGrid.classList.add('bg-white', 'text-sky-700', 'shadow-xs');
+                btnGrid.classList.remove('text-slate-600');
+                btnOverview.classList.remove('bg-white', 'text-sky-700', 'shadow-xs');
+                btnOverview.classList.add('text-slate-600');
+            } else {
+                renderOverviewList();
+                viewGrid.classList.add('hidden');
+                viewOverview.classList.remove('hidden');
+                btnOverview.classList.add('bg-white', 'text-sky-700', 'shadow-xs');
+                btnOverview.classList.remove('text-slate-600');
+                btnGrid.classList.remove('bg-white', 'text-sky-700', 'shadow-xs');
+                btnGrid.classList.add('text-slate-600');
+            }
+        }
+
+        // 渲染筆記總覽
+        function renderOverviewList() {
+            const container = document.getElementById('overview-content');
+            container.innerHTML = '';
+
+            gridQuestions.forEach((q) => {
+                const answer = document.getElementById(`answer-${q.id}`).value.trim() || '（尚未作答）';
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col md:flex-row md:items-start justify-between gap-3";
+                itemDiv.innerHTML = `
+                    <div class="space-y-1.5 grow">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-xs font-bold rounded ${q.badgeColor}">${q.step}</span>
+                            <span class="text-xs text-slate-500 font-bold">格位 #${q.id}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm md:text-base">${q.question}</h4>
+                        <div class="text-sm bg-white p-3 rounded-xl border border-slate-200 text-slate-700 font-medium whitespace-pre-wrap">
+                            ${answer}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // 產出報告視窗
+        function previewReportModal() {
+            const name = document.getElementById('student-name').value.trim() || '未填寫姓名';
+            const num = document.getElementById('student-number').value.trim() || '無';
+            
+            let text = `【《Alike》閱讀理解三步思維學習評量單】\n`;
+            text += `學生姓名：${name} ｜ 座號：${num} ｜ 評量日期：${new Date().toLocaleDateString('zh-TW')}\n`;
+            text += `學習向度：觀察 (Observation) ➔ 推論 (Inference) ➔ 找證據 (Evidence)\n`;
+            text += `----------------------------------------------------------\n\n`;
+
+            gridQuestions.forEach(q => {
+                const ans = document.getElementById(`answer-${q.id}`).value.trim() || '（學生未填寫）';
+                text += `【第 ${q.id} 格：${q.step}】\n`;
+                text += `問題：${q.question}\n`;
+                text += `學生回應：${ans}\n\n`;
+            });
+
+            text += `----------------------------------------------------------\n`;
+            text += `教師質性回饋 / IEP 目標達成觀察紀錄：\n`;
+
+            document.getElementById('modal-report-text').innerText = text;
+            document.getElementById('report-modal').classList.remove('hidden');
+            document.getElementById('copy-status').classList.add('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+        }
+
+        // 剪貼簿複製
+        function copyReportText() {
+            const content = document.getElementById('modal-report-text').innerText;
+            const copySuccess = () => {
+                const status = document.getElementById('copy-status');
+                status.classList.remove('hidden');
+                setTimeout(() => {
+                    status.classList.add('hidden');
+                }, 3000);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(content).then(copySuccess).catch(() => {
+                    fallbackCopy(content);
+                });
+            } else {
+                fallbackCopy(content);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const status = document.getElementById('copy-status');
+                status.classList.remove('hidden');
+            } catch (err) {
+                console.error('Copy failed');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // 清空重做確認
+        function resetAllFields() {
+            if (confirm("確定要清空所有已填寫的答案與姓名嗎？")) {
+                for (let i = 1; i <= 9; i++) {
+                    const el = document.getElementById(`answer-${i}`);
+                    if (el) el.value = '';
+                    const hintBox = document.getElementById(`hint-box-${i}`);
+                    if (hintBox) hintBox.classList.add('hidden');
+                }
+                document.getElementById('student-name').value = '';
+                document.getElementById('student-number').value = '';
+                updateProgress();
+            }
+        }
+    </script>
+
+<!-- === 學障教學大廳：通用浮動返回鈕 === -->
+<style id="floating-lobby-style">
+@media print { .floating-lobby-btn { display: none !important; } }
+.floating-lobby-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #0f172a;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 8px 10px -6px rgba(15, 23, 42, 0.3);
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.floating-lobby-btn:hover {
+  background: #2563eb;
+  color: #ffffff !important;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.floating-lobby-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .floating-lobby-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+</style>
+<a href="index.html" class="floating-lobby-btn" title="返回學障教學大廳首頁" aria-label="返回教學大廳首頁">
+  <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+  <span>返回大廳首頁</span>
+</a>
+
+</body>
+</html>
