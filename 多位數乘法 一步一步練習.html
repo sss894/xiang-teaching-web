@@ -90,12 +90,15 @@ function draw(){
     for(let k=0;k<j;k++)cells.push(cell(0,'z'));
     r.forEach((s,i)=>cells.push(s));
     if(cur&&cur.t==='m'&&cur.j===j)cells.push(cell('?','cur'));
+    // r holds strings right-to-left; reverse for display
     const shown=[...cells.slice(0,j)].concat(cells.slice(j).reverse());
     const out=shown.slice(0,j).length?shown:shown;
+    // zeros should be at the right end
     const zeros=cells.slice(0,j),rest=cells.slice(j).reverse();
     const all=rest.concat(zeros);
     h+='<div>'+Array(Math.max(0,W-all.length)).fill(cell('')).join('')+all.join('')+'</div>';
   });
+  // rows not yet started
   if(cur&&cur.t==='m'){for(let j=rows.length;j<dig(B).length;j++){}}
   if(dig(B).length>1){
     h+='<div class="line"></div>';
