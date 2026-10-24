@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alike 動畫故事寫作九宮格</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+    </style>
+</head>
+<body class="bg-sky-50 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-sky-100">
+        
+        <!-- 頂部標題區 -->
+        <div class="bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-6 text-center">
+            <span class="bg-white/20 text-xs px-3 py-1 rounded-full font-medium inline-block mb-2">特教適性教材 ｜ 寫作鷹架</span>
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">🎨 《Alike》故事心情與創意寫作九宮格</h1>
+            <p class="text-sky-100 text-sm md:text-base">觀察動畫中的藍色小男孩與爸爸，選出你喜歡的方格回答問題，完成你的寫作任務！</p>
+            <div class="mt-4 flex justify-center gap-2">
+                <a href="index.html" class="no-print bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1.5 rounded-lg border border-white/40 transition flex items-center gap-1 font-bold">🏠 返回大廳</a>
+                <button onclick="readInstructions()" class="bg-white/10 hover:bg-white/20 text-white text-xs px-3 py-1.5 rounded-lg border border-white/30 transition flex items-center gap-1">
+                    🔊 聽取操作說明
+                </button>
+            </div>
+        </div>
+
+        <!-- 任務指引 -->
+        <div class="bg-amber-50 border-b border-amber-200 px-6 py-3 flex items-center justify-between text-amber-800 text-sm">
+            <span>💡 <strong>提示：</strong>你可以自由選擇連線的 3 個格子（橫、直、斜皆可），或挑戰寫完所有 9 格！卡住時可點擊各格的「💡 看提示」。</span>
+            <span id="completed-count" class="font-bold bg-amber-200 px-2 py-0.5 rounded-full">已完成：0 / 9 格</span>
+        </div>
+
+        <!-- 九宮格主體 -->
+        <div class="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- 格子 1 -->
+            <div class="bg-sky-50/60 border-2 border-sky-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-sky-600 text-white text-xs font-bold px-2 py-0.5 rounded">格一：日常觀察</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(1)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('1. 動畫一開始，小男孩和爸爸每天要去哪裡？他們臉上的表情是什麼顏色？')" class="text-sky-600 hover:text-sky-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">動畫一開始，小男孩和爸爸每天要去哪裡？他們臉上的表情是什麼顏色？</p>
+                    <div id="hint-1" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 他們每天要去學校和上班，臉上灰灰的、沒有笑容...
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-1" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 2 -->
+            <div class="bg-indigo-50/60 border-2 border-indigo-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded">格二：轉折發現</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(2)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('2. 是什麼事情讓小男孩開心起來？')" class="text-indigo-600 hover:text-indigo-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">是什麼事情讓小男孩開心起來？（例如：看到彈吉他的街頭藝人）</p>
+                    <div id="hint-2" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 他看到有人在路邊彈吉他，覺得很有趣...
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-2" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 3 -->
+            <div class="bg-sky-50/60 border-2 border-sky-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-sky-600 text-white text-xs font-bold px-2 py-0.5 rounded">格三：色彩變化</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(3)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('3. 當小男孩感受到快樂或熱情時，他身上的顏色發生了什麼變化？')" class="text-sky-600 hover:text-sky-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">當小男孩感受到快樂或熱情時，他身上的顏色發生了什麼變化？</p>
+                    <div id="hint-3" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 他身上變成了彩色（橘色、藍色等），變得很亮...
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-3" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 4 -->
+            <div class="bg-indigo-50/60 border-2 border-indigo-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded">格四：爸爸的心情</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(4)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('4. 爸爸一開始為什麼要把小男孩拉開？爸爸擔心的是什麼？')" class="text-indigo-600 hover:text-indigo-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">爸爸一開始為什麼要把小男孩拉開？爸爸擔心的是什麼？</p>
+                    <div id="hint-4" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 爸爸擔心上學會遲到，希望趕快走規定的路...
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-4" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 5 (中心格) -->
+            <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition shadow-sm">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-amber-600 text-white text-xs font-bold px-2 py-0.5 rounded">🌟 中心格：我的經驗</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(5)" class="bg-amber-200 hover:bg-amber-300 text-amber-900 text-xs px-2 py-0.5 rounded transition font-bold">💡 提示</button>
+                            <button onclick="speakText('5. 你也有像小男孩一樣，做自己喜歡的事而感到快樂的經驗嗎？是什麼事？')" class="text-amber-700 hover:text-amber-900 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-800 text-sm font-bold mb-3">你也有像小男孩一樣，做自己喜歡的事而感到快樂的經驗嗎？是什麼事？</p>
+                    <div id="hint-5" class="hidden mb-3 p-2.5 bg-amber-100 border border-amber-300 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 我有，我最喜歡畫畫／打球，做的時候很開心...
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-5" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 6 -->
+            <div class="bg-indigo-50/60 border-2 border-indigo-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded">格六：親子互動</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(6)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('6. 後來爸爸看到了什麼？爸爸的態度有沒有改變？')" class="text-indigo-600 hover:text-indigo-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">後來爸爸看到了什麼？爸爸的態度有沒有改變？</p>
+                    <div id="hint-6" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 爸爸看到小男孩的笑容，也想起了自己的夢想...
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-6" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 7 -->
+            <div class="bg-sky-50/60 border-2 border-sky-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-sky-600 text-white text-xs font-bold px-2 py-0.5 rounded">格七：詞語接龍</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(7)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('7. 請寫出三個形容快樂或有活力的詞語。')" class="text-sky-600 hover:text-sky-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">請寫出三個形容「快樂」或「有活力」的詞語。</p>
+                    <div id="hint-7" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 1. 開心  2. 笑容  3. 充滿希望
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-7" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 8 -->
+            <div class="bg-indigo-50/60 border-2 border-indigo-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded">格八：故事寓意</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(8)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('8. 你覺得這部短片想告訴我們什麼道理？')" class="text-indigo-600 hover:text-indigo-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">你覺得這部短片想告訴我們什麼道理？</p>
+                    <div id="hint-8" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 不要被壓力綁住，要找到自己的興趣和快樂...
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-8" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+            <!-- 格子 9 -->
+            <div class="bg-sky-50/60 border-2 border-sky-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-sky-600 text-white text-xs font-bold px-2 py-0.5 rounded">格九：給爸爸的話</span>
+                        <div class="flex gap-1">
+                            <button onclick="toggleHint(9)" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded transition">💡 提示</button>
+                            <button onclick="speakText('9. 如果你是小男孩，你想對每天忙碌的爸爸說一句什麼話？')" class="text-sky-600 hover:text-sky-800 text-xs px-1">🔊 讀題</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm font-medium mb-3">如果你是小男孩，你想對每天忙碌的爸爸說一句什麼話？</p>
+                    <div id="hint-9" class="hidden mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                        <strong>引導範例：</strong> 爸爸，我們一起笑一個，不要太累喔！
+                    </div>
+                </div>
+                <div>
+                    <textarea id="grid-9" oninput="updateProgress()" class="w-full h-20 p-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none resize-none" placeholder="請在此輸入您的回答..."></textarea>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 底部控制與輸出區 -->
+        <div class="bg-gray-50 border-t border-gray-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <input type="text" id="student-name" placeholder="請輸入您的姓名" class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none w-full md:w-48">
+                <input type="text" id="student-id" placeholder="座號" class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none w-20">
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                <button onclick="clearAll()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg transition">
+                    🗑️ 清空重寫
+                </button>
+                <button onclick="generateReport()" class="bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium px-6 py-2 rounded-lg shadow transition flex items-center gap-2">
+                    📋 檢視並複製完整答案
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 結果彈跳視窗 (Modal) -->
+    <div id="result-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4 border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">✨ 你的寫作成果報告</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+            <div id="modal-content" class="bg-sky-50/50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-line mb-4 border border-sky-100">
+                <!-- 內容動態產生 -->
+            </div>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm">關閉</button>
+                <button onclick="copyToClipboard()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">複製文字給老師</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 互動與語音支援 -->
+    <script>
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-TW';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('您的瀏覽器不支援語音朗讀功能。');
+            }
+        }
+
+        function readInstructions() {
+            speakText('操作說明：觀看 Alike 動畫後，請在九宮格中選擇格子回答問題。如果覺得有困難，可以點擊每格右上角的提示按鈕來參考範例。');
+        }
+
+        function toggleHint(id) {
+            const hintBox = document.getElementById(`hint-${id}`);
+            if (hintBox.classList.contains('hidden')) {
+                hintBox.classList.remove('hidden');
+            } else {
+                hintBox.classList.add('hidden');
+            }
+        }
+
+        function updateProgress() {
+            let count = 0;
+            for (let i = 1; i <= 9; i++) {
+                const val = document.getElementById(`grid-${i}`).value.trim();
+                if (val !== '') {
+                    count++;
+                }
+            }
+            document.getElementById('completed-count').innerText = `已完成：${count} / 9 格`;
+        }
+
+        function clearAll() {
+            if (confirm('確定要清空所有已寫的內容嗎？')) {
+                for (let i = 1; i <= 9; i++) {
+                    document.getElementById(`grid-${i}`).value = '';
+                    document.getElementById(`hint-${i}`).classList.add('hidden');
+                }
+                document.getElementById('student-name').value = '';
+                document.getElementById('student-id').value = '';
+                updateProgress();
+            }
+        }
+
+        function generateReport() {
+            const name = document.getElementById('student-name').value.trim() || '未填姓名';
+            const seat = document.getElementById('student-id').value.trim() || '未填座號';
+            
+            const qTitles = [
+                "1. 動畫一開始的日常與表情",
+                "2. 讓小男孩開心起來的事情",
+                "3. 身體顏色的變化",
+                "4. 爸爸一開始的擔心",
+                "5. 我的快樂經驗（中心格）",
+                "6. 爸爸的態度轉變",
+                "7. 形容快樂的詞語",
+                "8. 短片想告訴我們的道理",
+                "9. 我想對爸爸說的話"
+            ];
+
+            let report = `【Alike 動畫故事寫作作業】\n姓名：${name}  座號：${seat}\n----------------------------------\n`;
+            
+            for (let i = 1; i <= 9; i++) {
+                const val = document.getElementById(`grid-${i}`).value.trim() || '（未作答）';
+                report += `${qTitles[i-1]}\n答：${val}\n\n`;
+            }
+
+            document.getElementById('modal-content').innerText = report;
+            document.getElementById('result-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+
+        function copyToClipboard() {
+            const content = document.getElementById('modal-content').innerText;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('已成功複製內容！可以貼給老師或繳交作業囉！');
+                closeModal();
+            }).catch(err => {
+                alert('複製失敗，請手動複製。');
+            });
+        }
+    </script>
+
+<!-- === 學障教學大廳：通用浮動返回鈕 === -->
+<style id="floating-lobby-style">
+@media print { .floating-lobby-btn { display: none !important; } }
+.floating-lobby-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #0f172a;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 8px 10px -6px rgba(15, 23, 42, 0.3);
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.floating-lobby-btn:hover {
+  background: #2563eb;
+  color: #ffffff !important;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.floating-lobby-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .floating-lobby-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+</style>
+<a href="index.html" class="floating-lobby-btn" title="返回學障教學大廳首頁" aria-label="返回教學大廳首頁">
+  <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+  <span>返回大廳首頁</span>
+</a>
+
+</body>
+</html>
