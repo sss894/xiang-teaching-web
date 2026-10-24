@@ -159,7 +159,7 @@ async function sheet(ans){
   const W=1654,H=2339,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   const R='#d33',{k,d,ming,hua,unk,known,rel,op,ans:A,long,short}=Q;
   const T=(s,px,X,Y,col,al,b)=>{x.font=`${b||''}${px}px ${F}`;x.fillStyle=col||'#000';x.textAlign=al||'left';x.fillText(s,X,Y)};
-  x.fillStyle='#fff';x.fillRect(0,W,H);
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);
   T('線段圖應用題作業單'+(ans?'（解答）':''),64,110,150,ans?R:'#000','left','bold ');
   T('班級＿＿＿＿　座號＿＿＿　姓名＿＿＿＿＿＿　日期＿＿＿＿＿＿',34,110,225);
   T('題目：'+Q.text,40,110,330);
