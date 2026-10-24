@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>多位數乘法 一步一步練習</title>
+<style>
+:root{--bg:#fafaf7;--card:#fff;--tx:#222;--mut:#777;--bl:#2563eb;--or:#ea580c;--gr:#16a34a;--am:#fef3c7;--amt:#92400e;--bd:#ddd;--rd:#dc2626;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181a;--card:#222426;--tx:#eee;--mut:#9a9a9a;--bl:#60a5fa;--or:#fb923c;--gr:#4ade80;--am:#3b2f10;--amt:#fcd34d;--bd:#444;--rd:#f87171;color-scheme:dark}}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;font-size:20px}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:24px;margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:12px}
+.setup{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input{font:inherit;font-size:22px;border:2px solid var(--bd);border-radius:10px;padding:6px 10px;background:var(--bg);color:var(--tx);width:90px;text-align:center}
+input:focus{outline:none;border-color:var(--bl)}
+button{font:inherit;font-size:20px;border:0;border-radius:10px;padding:10px 18px;background:var(--bl);color:#fff;cursor:pointer}
+button.sec{background:var(--bg);color:var(--tx);border:2px solid var(--bd)}
+button:disabled{opacity:.4}
+.vf{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:38px;line-height:1.35;text-align:right;display:inline-block;min-width:60%}
+.vf div{display:flex;justify-content:flex-end}
+.vf span{width:1.05em;text-align:center;display:inline-block}
+.a{color:var(--bl)}.b{color:var(--or)}.res{color:var(--gr)}.z{color:var(--mut);opacity:.6}
+.line{border-top:3px solid var(--tx);margin:4px 0}
+.cur{background:var(--am);color:var(--amt);border-radius:6px}
+.q{font-size:26px;font-weight:700;margin:6px 0}
+.msg{min-height:28px;font-size:19px;margin:8px 0}
+.ok{color:var(--gr)}.no{color:var(--rd)}
+.hint{background:var(--am);color:var(--amt);border-radius:10px;padding:10px 14px;margin:8px 0;display:none}
+.tablewrap{overflow:hidden;max-height:0;opacity:0;transition:max-height .5s ease,opacity .4s ease}
+.tablewrap.open{max-height:520px;opacity:1}
+table{border-collapse:collapse;margin:10px auto;font-size:17px}
+td,th{border:1px solid var(--bd);width:34px;height:32px;text-align:center}
+th{background:var(--bg);color:var(--mut)}
+td.hl{background:var(--am);color:var(--amt);font-weight:700}
+td.hit{background:var(--bl);color:#fff;font-weight:700}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.prog{color:var(--mut);font-size:16px}
+@media (prefers-reduced-motion:reduce){.tablewrap{transition:none}}
+</style></head><body><main>
+<div class="no-print" style="margin-bottom:14px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#2563eb;text-decoration:none;font-weight:bold;padding:5px 12px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;box-shadow:0 1px 2px rgba(0,0,0,0.05)">🏠 返回教學大廳首頁</a></div>
+<h1>✖️ 多位數乘法 一步一步算</h1>
+<div class="card setup">
+  <input id="ia" type="number" value="36" inputmode="numeric"> ×
+  <input id="ib" type="number" value="24" inputmode="numeric">
+  <button id="go">開始</button><button class="sec" id="rnd">隨機出題</button>
+  <div id="err" class="no" style="width:100%;font-size:17px"></div>
+</div>
+<div class="card" id="work" style="text-align:center"></div>
+<div class="card" id="ask">
+  <div class="prog" id="prog"></div>
+  <div class="q" id="qt"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input id="ans" type="number" inputmode="numeric" placeholder="答案">
+    <button id="chk">確定</button>
+    <button class="sec" id="hbtn">💡 提示</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div class="hint" id="hint"></div>
+  <div class="tablewrap" id="tw">
+    <table id="tb"></table>
+    <div style="text-align:center"><button class="sec" id="hide">收起乘法表，繼續答題</button></div>
+  </div>
+</div>
+<script>
+let A,B,qs,qi,rows,total,hintOpen;
+const $=id=>document.getElementById(id);
+const dig=n=>String(n).split('').map(Number);
+function build(a,b){
+  A=a;B=b;total=a*b;qs=[];rows=[];
+  const ad=dig(a).reverse(),bd=dig(b).reverse();
+  bd.forEach((d,j)=>{rows.push([]);let c=0;
+    ad.forEach((x,i)=>{const v=x*d+c;
+      qs.push({t:'m',j,i,x,d,c,v,last:i===ad.length-1});c=Math.floor(v/10)});});
+  if(bd.length>1)qs.push({t:'s',v:total});
+  qi=0;hintOpen=false;
+  $('tw').classList.remove('open');$('hint').style.display='none';
+  draw();
+}
+function cell(ch,cls){return `<span class="${cls||''}">${ch}</span>`}
+function draw(){
+  const W=String(total).length+1;
+  let h='<div class="vf">';
+  const pad=(s,w)=>Array(w-s.length).fill(cell('')).join('');
+  h+='<div>'+pad(String(A),W)+dig(A).map(d=>cell(d,'a')).join('')+'</div>';
+  h+='<div>'+cell('×','')+pad(String(B),W-1)+dig(B).map(d=>cell(d,'b')).join('')+'</div>';
+  h+='<div class="line"></div>';
+  const cur=qs[qi];
+  rows.forEach((r,j)=>{
+    let cells=[];
+    for(let k=0;k<j;k++)cells.push(cell(0,'z'));
+    r.forEach((s,i)=>cells.push(s));
+    if(cur&&cur.t==='m'&&cur.j===j)cells.push(cell('?','cur'));
+    const shown=[...cells.slice(0,j)].concat(cells.slice(j).reverse());
+    const out=shown.slice(0,j).length?shown:shown;
+    const zeros=cells.slice(0,j),rest=cells.slice(j).reverse();
+    const all=rest.concat(zeros);
+    h+='<div>'+Array(Math.max(0,W-all.length)).fill(cell('')).join('')+all.join('')+'</div>';
+  });
+  if(cur&&cur.t==='m'){for(let j=rows.length;j<dig(B).length;j++){}}
+  if(dig(B).length>1){
+    h+='<div class="line"></div>';
+    const done=qi>=qs.length;
+    const s=done?String(total):(cur&&cur.t==='s'?'?':'');
+    h+='<div>'+Array(Math.max(0,W-s.length)).fill(cell('')).join('')+dig(s==='?'?0:s||0).slice(0,0).join('')+(s===''?'':s.split('').map(c=>cell(c,done?'res':'cur')).join(''))+'</div>';
+  }
+  h+='</div>';
+  $('work').innerHTML=h;
+  ask();
+}
+function ask(){
+  $('msg').textContent='';$('ans').value='';
+  const cur=qs[qi];
+  if(!cur){
+    $('prog').textContent='完成！';
+    $('qt').innerHTML=`<span class="res">🎉 ${A} × ${B} = ${total}</span>`;
+    $('ans').style.display=$('chk').style.display=$('hbtn').style.display='none';
+    $('tw').classList.remove('open');$('hint').style.display='none';return;
+  }
+  $('ans').style.display=$('chk').style.display=$('hbtn').style.display='';
+  $('prog').textContent=`第 ${qi+1} 題 / 共 ${qs.length} 題`;
+  if(cur.t==='m'){
+    const pos=['個','十','百','千'][cur.i]||'';
+    $('qt').innerHTML=`<span class="a">${cur.x}</span> × <span class="b">${cur.d}</span>`+(cur.c?` ＋ 進位 ${cur.c}`:'')+' = ？';
+  }else $('qt').textContent='把上面每一列加起來，總共是多少？';
+  buildTable(cur);
+  $('hint').style.display='none';$('tw').classList.remove('open');hintOpen=false;
+  $('ans').focus({preventScroll:true});
+}
+function buildTable(cur){
+  let h='<tr><th>×</th>'+[1,2,3,4,5,6,7,8,9].map(n=>`<th>${n}</th>`).join('')+'</tr>';
+  for(let r=1;r<=9;r++){h+=`<tr><th>${r}</th>`;
+    for(let c=1;c<=9;c++){let k='';
+      if(cur.t==='m'){if(r===cur.x&&c===cur.d)k='hit';else if(r===cur.x||c===cur.d)k='hl'}
+      h+=`<td class="${k}">${r*c}</td>`}
+    h+='</tr>'}
+  $('tb').innerHTML=h;
+}
+$('hbtn').onclick=()=>{
+  const cur=qs[qi];if(!cur)return;
+  const hn=$('hint');hn.style.display='block';
+  hn.innerHTML=cur.t==='m'
+    ?`想一想：${cur.x} × ${cur.d} 可以查九九乘法表${cur.c?`，得到 ${cur.x*cur.d} 後，再加上上一格進位的 ${cur.c}`:''}。往下看表，黃色是 ${cur.x} 那一列和 ${cur.d} 那一行，藍色格就是答案。`
+    :'把每一列的數字上下對齊，從個位開始加。小心：第二列最右邊的 0 也要算進去。';
+  requestAnimationFrame(()=>$('tw').classList.add('open'));
+  if(cur.t==='s')$('tw').classList.remove('open');
+  hintOpen=true;
+};
+$('hide').onclick=()=>{$('tw').classList.remove('open');$('ans').focus({preventScroll:true})};
+function check(){
+  const cur=qs[qi];if(!cur)return;
+  const v=$('ans').value.trim();if(v==='')return;
+  if(Number(v)===cur.v){
+    if(cur.t==='m'){
+      const r=rows[cur.j];
+      (cur.last?dig(cur.v).reverse():[cur.v%10]).forEach(d=>r.push(cell(d,'res')));
+    }
+    qi++;draw();
+    if(qs[qi])$('msg').innerHTML='<span class="ok">答對了！</span>';
+  }else{
+    $('msg').innerHTML='<span class="no">再想想看，可以按「提示」。</span>';
+    $('ans').select();
+  }
+}
+$('chk').onclick=check;
+$('ans').addEventListener('keydown',e=>{if(e.key==='Enter')check()});
+function start(){
+  const a=parseInt($('ia').value,10),b=parseInt($('ib').value,10);
+  if(!(a>=2&&a<=999)||!(b>=2&&b<=99)){$('err').textContent='被乘數請填 2 到 999，乘數請填 2 到 99。';return}
+  $('err').textContent='';build(a,b);
+}
+$('go').onclick=start;
+$('rnd').onclick=()=>{
+  $('ia').value=10+Math.floor(Math.random()*90);
+  $('ib').value=10+Math.floor(Math.random()*40);start();
+};
+start();
+</script></main>
+<!-- === 學障教學大廳：通用浮動返回鈕 === -->
+<style id="floating-lobby-style">
+@media print { .floating-lobby-btn { display: none !important; } }
+.floating-lobby-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #0f172a;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 8px 10px -6px rgba(15, 23, 42, 0.3);
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.floating-lobby-btn:hover {
+  background: #2563eb;
+  color: #ffffff !important;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.floating-lobby-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .floating-lobby-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+</style>
+<a href="index.html" class="floating-lobby-btn" title="返回學障教學大廳首頁" aria-label="返回教學大廳首頁">
+  <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+  <span>返回大廳首頁</span>
+</a>
+
+</body></html>
