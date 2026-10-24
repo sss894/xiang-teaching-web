@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數學直式定位板出題產生器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 12mm 14mm;
+            margin: 0 auto 24px auto;
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative;
+            page-break-after: always;
+            break-after: page;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .a4-page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+
+        .math-grid-table {
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-family: 'Arial', 'Noto Sans TC', sans-serif;
+            table-layout: fixed;
+        }
+
+        .math-grid-table td, .math-grid-table th {
+            box-sizing: border-box;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+            position: relative;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #preview-wrapper {
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                height: auto !important;
+            }
+            .a4-page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                padding: 10mm 12mm !important;
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+    <header class="no-print bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-center justify-between gap-4 z-20 shadow-sm shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-sm">
+                <i class="fa-solid fa-table-cells"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-black tracking-tight text-slate-900 flex items-center gap-2">
+                    數學直式定位板出題產生器
+                    <span class="text-xs font-semibold px-2.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200">教學專用版</span>
+                </h1>
+                <p class="text-xs text-slate-500">支援加減乘除、多位除數、多層進位、僅輔助線與 Word / PDF 下載</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="index.html" class="no-print px-3.5 py-2 rounded-lg text-sm font-bold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100 transition flex items-center gap-1.5 shadow-sm"><span>🏠 返回大廳</span></a>
+            <button id="btn-toggle-ans" onclick="toggleAnswerMode()" class="px-3.5 py-2 rounded-lg text-sm font-semibold border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-eye" id="ans-icon"></i>
+                <span id="ans-text">顯示解答</span>
+            </button>
+
+            <button onclick="generateNewProblems()" class="px-4 py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-rotate"></i>
+                重新隨機出題
+            </button>
+
+            <div class="h-6 w-px bg-slate-200 mx-1"></div>
+
+            <button onclick="exportToWord()" class="px-4 py-2 rounded-lg text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-file-word"></i>
+                下載 Word (.doc)
+            </button>
+
+            <button id="btn-pdf" onclick="exportToPDF()" class="px-4 py-2 rounded-lg text-sm font-bold bg-rose-600 text-white hover:bg-rose-700 active:scale-95 transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>下載 PDF</span>
+            </button>
+
+            <button onclick="window.print()" class="px-3.5 py-2 rounded-lg text-sm font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-2 shadow-sm" title="使用瀏覽器列印或另存高畫質PDF">
+                <i class="fa-solid fa-print"></i>
+                直接列印
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        
+        <aside class="no-print w-full md:w-96 bg-white border-r border-slate-200 overflow-y-auto p-5 space-y-6 shrink-0 z-10">
+            
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-600 mr-1"></i> 快速套用教材範本
+                </label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="applyPreset('add_carry_guide')" class="text-xs px-2.5 py-2 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-lg text-left font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span> 二位加法(進位提示)
+                    </button>
+                    <button onclick="applyPreset('sub_borrow_guide')" class="text-xs px-2.5 py-2 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-lg text-left font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span> 二位減法(退位提示)
+                    </button>
+                    <button onclick="applyPreset('mul_2x2_step')" class="text-xs px-2.5 py-2 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-lg text-left font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-purple-500 shrink-0"></span> 乘法 2×2 (多層進位)
+                    </button>
+                    <button onclick="applyPreset('div_3d2_color')" class="text-xs px-2.5 py-2 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-lg text-left font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-teal-500 shrink-0"></span> 長除法 3÷2 (多位除數)
+                    </button>
+                    <button onclick="applyPreset('only_guidelines')" class="col-span-2 text-xs px-2.5 py-2 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-lg text-left font-medium transition flex items-center gap-1.5 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span> 5 僅輔助線模式 (僅垂直虛線與橫線)
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-black">1</span>
+                    運算模式選擇
+                </h2>
+                <div class="grid grid-cols-5 gap-1.5">
+                    <button onclick="setOperation('add')" id="op-add" class="op-btn py-2.5 rounded-lg border text-center font-bold text-sm transition">
+                        <div class="text-base">＋</div>
+                        <div class="text-xs">加法</div>
+                    </button>
+                    <button onclick="setOperation('sub')" id="op-sub" class="op-btn py-2.5 rounded-lg border text-center font-bold text-sm transition">
+                        <div class="text-base">－</div>
+                        <div class="text-xs">減法</div>
+                    </button>
+                    <button onclick="setOperation('add_sub')" id="op-add_sub" class="op-btn py-2.5 rounded-lg border text-center font-bold text-sm transition">
+                        <div class="text-base">±</div>
+                        <div class="text-xs">加減混合</div>
+                    </button>
+                    <button onclick="setOperation('mul')" id="op-mul" class="op-btn py-2.5 rounded-lg border text-center font-bold text-sm transition">
+                        <div class="text-base">×</div>
+                        <div class="text-xs">乘法</div>
+                    </button>
+                    <button onclick="setOperation('div')" id="op-div" class="op-btn py-2.5 rounded-lg border text-center font-bold text-sm transition">
+                        <div class="text-base">÷</div>
+                        <div class="text-xs">除法</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-slate-100">
+                <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-black">2</span>
+                    位數與難度設定
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label id="label-d1" class="block text-xs font-semibold text-slate-600 mb-1">第一數</label>
+                        <select id="select-d1" onchange="onDigitChange()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="1">1 位數</option>
+                            <option value="2" selected>2 位數</option>
+                            <option value="3">3 位數</option>
+                            <option value="4">4 位數</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label id="label-d2" class="block text-xs font-semibold text-slate-600 mb-1">第二數</label>
+                        <select id="select-d2" onchange="onDigitChange()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="1">1 位數</option>
+                            <option value="2" selected>2 位數</option>
+                            <option value="3">3 位數</option>
+                            <option value="4">4 位數</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">進退位 / 餘數條件</label>
+                    <select id="select-regroup" onchange="generateNewProblems()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="force">必定進位 / 退位</option>
+                        <option value="none">不進位 / 不退位</option>
+                        <option value="random">隨機混合</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-slate-100">
+                <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-black">3</span>
+                    定位板樣式與引導設計
+                </h2>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">定位板表頭樣式</label>
+                    <select id="select-board-style" onchange="renderWorksheet()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="classic">標準文字表頭（千、百、十、個位）</option>
+                        <option value="coins">錢幣圖示表頭（1000、100、10、1 圓幣）</option>
+                        <option value="ribbon">絲帶立體表頭（十位、個位標籤風）</option>
+                        <option value="guidelines">5 僅輔助線（乾淨垂直虛線與橫線，無外框）</option>
+                        <option value="minimal">極簡無表頭（純定位格線）</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">題目填入方式</label>
+                    <select id="select-prefill" onchange="renderWorksheet()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="prefilled">已填入直式數字（直接計算答案）</option>
+                        <option value="blank">空白直式格（看上方橫式，自行對位填入）</option>
+                        <option value="trace">淺色描寫字（提供淺灰數字供描寫）</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2 pt-1">
+                    <label class="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer select-none">
+                        <input type="checkbox" id="chk-carry-box" checked onchange="renderWorksheet()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span>顯示進位/退位/乘除法輔助格</span>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer select-none">
+                        <input type="checkbox" id="chk-color-cue" checked onchange="renderWorksheet()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span>啟用彩色視覺提示（多層乘法/數位套色）</span>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer select-none">
+                        <input type="checkbox" id="chk-horizontal" checked onchange="renderWorksheet()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span>在定位板上方顯示橫式題目</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-slate-100">
+                <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-black">4</span>
+                    格子大小、版面與題數
+                </h2>
+
+                <div class="p-3 rounded-xl border-2 transition cursor-pointer" id="enlarge-card" onclick="toggleEnlargeGrid()">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600 text-lg"></i>
+                            <div>
+                                <div class="text-sm font-bold text-slate-800">放大格子模式（特教/低年級推薦）</div>
+                                <div class="text-xs text-slate-500">加大書寫空間與字體，方便手部精細動作</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="chk-enlarge" class="w-5 h-5 text-indigo-600 rounded pointer-events-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">總題數</label>
+                        <select id="select-total-count" onchange="generateNewProblems()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="2">2 題</option>
+                            <option value="4">4 題</option>
+                            <option value="6">6 題</option>
+                            <option value="8" selected>8 題</option>
+                            <option value="9">9 題</option>
+                            <option value="12">12 題</option>
+                            <option value="16">16 題</option>
+                            <option value="20">20 題</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">每列並排題數（欄數）</label>
+                        <select id="select-cols" onchange="renderWorksheet()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="1">每列 1 題</option>
+                            <option value="2" selected>每列 2 題</option>
+                            <option value="3">每列 3 題</option>
+                            <option value="4">每列 4 題</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">自訂卷首標題</label>
+                    <input type="text" id="input-title" value="數學直式定位板練習卷" oninput="renderWorksheet()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="請輸入學習單標題">
+                </div>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+                <button onclick="toggleCustomProblemModal()" class="w-full py-2 px-3 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i>
+                    手動修改/自訂每一題的數字
+                </button>
+            </div>
+        </aside>
+
+        <main id="preview-wrapper" class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-200/80 flex flex-col items-center">
+            <div class="no-print mb-4 flex items-center gap-3 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-sm border border-slate-200 text-xs text-slate-600">
+                <span><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> 即時 A4 預覽</span>
+                <span>•</span>
+                <span id="page-info-badge">共 1 頁</span>
+                <span>•</span>
+                <span>支援匯出含解答或學生空白卷</span>
+            </div>
+
+            <div id="worksheet-container" class="w-full flex flex-col items-center"></div>
+        </main>
+    </div>
+
+    <div id="custom-modal" class="no-print fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[85vh]">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-list-ol text-indigo-600"></i> 手動編輯題目數字
+                </h3>
+                <button onclick="toggleCustomProblemModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-3 flex-1" id="custom-problem-list"></div>
+            <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                <button onclick="toggleCustomProblemModal()" class="px-4 py-2 rounded-lg text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-100">取消</button>
+                <button onclick="saveCustomProblems()" class="px-4 py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white hover:bg-indigo-700">套用修改</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="no-print fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2.5 opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+        <i class="fa-solid fa-circle-info text-indigo-400"></i>
+        <span id="toast-msg">訊息通知</span>
+    </div>
+
+    <script>
+        const state = {
+            operation: 'add',
+            d1: 2,
+            d2: 2,
+            regroup: 'force',
+            boardStyle: 'classic',
+            prefill: 'prefilled',
+            showCarryBox: true,
+            showColorCue: true,
+            showHorizontal: true,
+            enlargeGrid: false,
+            totalCount: 8,
+            cols: 2,
+            showAnswer: false,
+            title: '數學直式定位板練習卷',
+            problems: []
+        };
+
+        const PLACE_NAMES = ['個位', '十位', '百位', '千位', '萬位'];
+        const PLACE_SHORT = ['個', '十', '百', '千', '萬'];
+        const COIN_VALUES = ['1', '10', '100', '1000', '10000'];
+
+        const MULTIPLIER_COLORS = [
+            { bg: '#fee2e2', text: '#b91c1c', border: '#fca5a5' }, // 第一層 (個位乘): 紅色系
+            { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' }, // 第二層 (十位乘): 藍色系
+            { bg: '#dcfce7', text: '#15803d', border: '#86efac' }  // 第三層 (百位乘): 綠色系
+        ];
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2800);
+        }
+
+        function syncControlsFromState() {
+            document.querySelectorAll('.op-btn').forEach(btn => {
+                btn.className = 'op-btn py-2.5 rounded-lg border text-center font-bold text-sm transition border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100';
+            });
+            const activeOpBtn = document.getElementById(`op-${state.operation}`);
+            if (activeOpBtn) {
+                activeOpBtn.className = 'op-btn py-2.5 rounded-lg border text-center font-bold text-sm transition border-indigo-600 bg-indigo-600 text-white shadow-sm';
+            }
+
+            document.getElementById('select-d1').value = state.d1;
+            document.getElementById('select-d2').value = state.d2;
+            document.getElementById('select-regroup').value = state.regroup;
+            document.getElementById('select-board-style').value = state.boardStyle;
+            document.getElementById('select-prefill').value = state.prefill;
+            document.getElementById('chk-carry-box').checked = state.showCarryBox;
+            document.getElementById('chk-color-cue').checked = state.showColorCue;
+            document.getElementById('chk-horizontal').checked = state.showHorizontal;
+            document.getElementById('chk-enlarge').checked = state.enlargeGrid;
+            document.getElementById('select-total-count').value = state.totalCount;
+            document.getElementById('select-cols').value = state.cols;
+            document.getElementById('input-title').value = state.title;
+
+            const enlargeCard = document.getElementById('enlarge-card');
+            if (state.enlargeGrid) {
+                enlargeCard.className = 'p-3 rounded-xl border-2 transition cursor-pointer border-indigo-600 bg-indigo-50/60';
+            } else {
+                enlargeCard.className = 'p-3 rounded-xl border-2 transition cursor-pointer border-slate-200 bg-slate-50 hover:border-slate-300';
+            }
+
+            updateRegroupOptionsUI();
+        }
+
+        function updateRegroupOptionsUI() {
+            const d1Label = document.getElementById('label-d1');
+            const d2Label = document.getElementById('label-d2');
+            const regroupSelect = document.getElementById('select-regroup');
+            const currentVal = regroupSelect.value;
+
+            if (state.operation === 'add') {
+                d1Label.textContent = '被加數位數';
+                d2Label.textContent = '加數位數';
+                regroupSelect.innerHTML = `
+                    <option value="force">必定進位</option>
+                    <option value="none">不進位</option>
+                    <option value="random">隨機混合</option>
+                `;
+            } else if (state.operation === 'sub') {
+                d1Label.textContent = '被減數位數';
+                d2Label.textContent = '減數位數';
+                regroupSelect.innerHTML = `
+                    <option value="force">必定退位</option>
+                    <option value="none">不退位</option>
+                    <option value="random">隨機混合</option>
+                `;
+            } else if (state.operation === 'add_sub') {
+                d1Label.textContent = '第一數位數';
+                d2Label.textContent = '第二數位數';
+                regroupSelect.innerHTML = `
+                    <option value="force">必定進位 / 退位</option>
+                    <option value="none">不進位 / 不退位</option>
+                    <option value="random">隨機混合</option>
+                `;
+            } else if (state.operation === 'mul') {
+                d1Label.textContent = '被乘數位數';
+                d2Label.textContent = '乘數位數';
+                regroupSelect.innerHTML = `
+                    <option value="random">隨機出題</option>
+                    <option value="force">必定有進位</option>
+                    <option value="none">無進位</option>
+                `;
+            } else if (state.operation === 'div') {
+                d1Label.textContent = '被除數位數 (1~4位)';
+                d2Label.textContent = '除數位數 (1~3位)';
+                regroupSelect.innerHTML = `
+                    <option value="none">必定整除</option>
+                    <option value="force">必定有餘數</option>
+                    <option value="random">隨機</option>
+                `;
+            }
+
+            if (['force', 'none', 'random'].includes(currentVal)) {
+                regroupSelect.value = currentVal;
+            }
+        }
+
+        function readControlsToState() {
+            state.d1 = parseInt(document.getElementById('select-d1').value, 10);
+            state.d2 = parseInt(document.getElementById('select-d2').value, 10);
+            state.regroup = document.getElementById('select-regroup').value;
+            state.boardStyle = document.getElementById('select-board-style').value;
+            state.prefill = document.getElementById('select-prefill').value;
+            state.showCarryBox = document.getElementById('chk-carry-box').checked;
+            state.showColorCue = document.getElementById('chk-color-cue').checked;
+            state.showHorizontal = document.getElementById('chk-horizontal').checked;
+            state.enlargeGrid = document.getElementById('chk-enlarge').checked;
+            state.totalCount = parseInt(document.getElementById('select-total-count').value, 10);
+            state.cols = parseInt(document.getElementById('select-cols').value, 10);
+            state.title = document.getElementById('input-title').value || '數學直式定位板練習卷';
+        }
+
+        function setOperation(op) {
+            state.operation = op;
+            syncControlsFromState();
+            generateNewProblems();
+        }
+
+        function onDigitChange() {
+            readControlsToState();
+            generateNewProblems();
+        }
+
+        function toggleEnlargeGrid() {
+            state.enlargeGrid = !state.enlargeGrid;
+            if (state.enlargeGrid && state.cols > 2) {
+                state.cols = 2;
+                document.getElementById('select-cols').value = 2;
+            }
+            syncControlsFromState();
+            renderWorksheet();
+        }
+
+        function toggleAnswerMode() {
+            state.showAnswer = !state.showAnswer;
+            const btn = document.getElementById('btn-toggle-ans');
+            const icon = document.getElementById('ans-icon');
+            const text = document.getElementById('ans-text');
+            if (state.showAnswer) {
+                btn.className = 'px-3.5 py-2 rounded-lg text-sm font-bold border border-amber-500 bg-amber-500 text-white hover:bg-amber-600 transition flex items-center gap-2 shadow-sm';
+                icon.className = 'fa-solid fa-eye-slash';
+                text.textContent = '隱藏解答';
+            } else {
+                btn.className = 'px-3.5 py-2 rounded-lg text-sm font-semibold border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition flex items-center gap-2 shadow-sm';
+                icon.className = 'fa-solid fa-eye';
+                text.textContent = '顯示解答';
+            }
+            renderWorksheet();
+        }
+
+        function applyPreset(presetName) {
+            if (presetName === 'add_carry_guide') {
+                state.operation = 'add';
+                state.d1 = 2;
+                state.d2 = 1;
+                state.regroup = 'force';
+                state.boardStyle = 'classic';
+                state.prefill = 'prefilled';
+                state.showCarryBox = true;
+                state.showColorCue = true;
+                state.showHorizontal = true;
+                state.enlargeGrid = true;
+                state.totalCount = 6;
+                state.cols = 2;
+                state.title = '二位數加一位數（進位定位板練習）';
+            } else if (presetName === 'sub_borrow_guide') {
+                state.operation = 'sub';
+                state.d1 = 2;
+                state.d2 = 2;
+                state.regroup = 'force';
+                state.boardStyle = 'coins';
+                state.prefill = 'prefilled';
+                state.showCarryBox = true;
+                state.showColorCue = true;
+                state.showHorizontal = true;
+                state.enlargeGrid = true;
+                state.totalCount = 6;
+                state.cols = 2;
+                state.title = '二位數退位減法（借10視覺定位板）';
+            } else if (presetName === 'mul_2x2_step') {
+                state.operation = 'mul';
+                state.d1 = 2;
+                state.d2 = 2;
+                state.regroup = 'force';
+                state.boardStyle = 'guidelines';
+                state.prefill = 'prefilled';
+                state.showCarryBox = true;
+                state.showColorCue = true;
+                state.showHorizontal = true;
+                state.enlargeGrid = true;
+                state.totalCount = 4;
+                state.cols = 2;
+                state.title = '多位數乘法（僅輔助線與多層進位）';
+            } else if (presetName === 'div_3d2_color') {
+                state.operation = 'div';
+                state.d1 = 3;
+                state.d2 = 2;
+                state.regroup = 'random';
+                state.boardStyle = 'guidelines';
+                state.prefill = 'prefilled';
+                state.showCarryBox = false;
+                state.showColorCue = true;
+                state.showHorizontal = true;
+                state.enlargeGrid = true;
+                state.totalCount = 6;
+                state.cols = 2;
+                state.title = '三位數除以二位數（僅輔助線長除法）';
+            } else if (presetName === 'only_guidelines') {
+                state.operation = 'add';
+                state.d1 = 2;
+                state.d2 = 2;
+                state.regroup = 'random';
+                state.boardStyle = 'guidelines';
+                state.prefill = 'prefilled';
+                state.showCarryBox = true;
+                state.showColorCue = false;
+                state.showHorizontal = true;
+                state.enlargeGrid = true;
+                state.totalCount = 6;
+                state.cols = 2;
+                state.title = '數學直式僅輔助線練習卷';
+            }
+            syncControlsFromState();
+            generateNewProblems();
+            showToast('已套用教材範本設定！');
+        }
+
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function getMinMaxByDigits(d) {
+            if (d === 1) return [2, 9];
+            const min = Math.pow(10, d - 1);
+            const max = Math.pow(10, d) - 1;
+            return [min, max];
+        }
+
+        function hasAdditionCarry(a, b) {
+            while (a > 0 || b > 0) {
+                if ((a % 10) + (b % 10) >= 10) return true;
+                a = Math.floor(a / 10);
+                b = Math.floor(b / 10);
+            }
+            return false;
+        }
+
+        function hasSubtractionBorrow(a, b) {
+            while (a > 0 || b > 0) {
+                if ((a % 10) < (b % 10)) return true;
+                a = Math.floor(a / 10);
+                b = Math.floor(b / 10);
+            }
+            return false;
+        }
+
+        function hasMultiplicationCarry(a, b) {
+            const bDigits = String(b).split('').map(Number);
+            for (let bd of bDigits) {
+                let temp = a;
+                while (temp > 0) {
+                    if ((temp % 10) * bd >= 10) return true;
+                    temp = Math.floor(temp / 10);
+                }
+            }
+            return false;
+        }
+
+        function generateSingleProblem(opType, d1, d2, regroupRule) {
+            const actualOp = opType === 'add_sub' ? (Math.random() < 0.5 ? 'add' : 'sub') : opType;
+            const [min1, max1] = getMinMaxByDigits(d1);
+            const [min2, max2] = getMinMaxByDigits(d2);
+
+            for (let attempt = 0; attempt < 250; attempt++) {
+                let n1 = randInt(min1, max1);
+                let n2 = randInt(min2, max2);
+
+                if (actualOp === 'add') {
+                    const carry = hasAdditionCarry(n1, n2);
+                    if (regroupRule === 'force' && !carry) continue;
+                    if (regroupRule === 'none' && carry) continue;
+                    return { op: 'add', n1, n2, ans: n1 + n2 };
+                } else if (actualOp === 'sub') {
+                    if (n1 <= n2) [n1, n2] = [n2, n1];
+                    const borrow = hasSubtractionBorrow(n1, n2);
+                    if (regroupRule === 'force' && !borrow) continue;
+                    if (regroupRule === 'none' && borrow) continue;
+                    return { op: 'sub', n1, n2, ans: n1 - n2 };
+                } else if (actualOp === 'mul') {
+                    const carry = hasMultiplicationCarry(n1, n2);
+                    if (regroupRule === 'force' && !carry) continue;
+                    if (regroupRule === 'none' && carry) continue;
+                    return { op: 'mul', n1, n2, ans: n1 * n2 };
+                } else if (actualOp === 'div') {
+                    const divisor = randInt(min2, max2);
+                    const minQ = Math.max(1, Math.ceil(min1 / divisor));
+                    const maxQ = Math.floor(max1 / divisor);
+                    if (maxQ < minQ) continue;
+
+                    const q = randInt(minQ, maxQ);
+                    let rem = 0;
+
+                    if (regroupRule === 'force') {
+                        if (divisor <= 1) continue;
+                        const maxRem = Math.min(divisor - 1, max1 - q * divisor);
+                        if (maxRem < 1) continue;
+                        rem = randInt(1, maxRem);
+                    } else if (regroupRule === 'random') {
+                        const maxRem = Math.min(divisor - 1, max1 - q * divisor);
+                        rem = maxRem >= 1 && Math.random() < 0.5 ? randInt(1, maxRem) : 0;
+                    } else {
+                        rem = 0;
+                    }
+
+                    const dividend = q * divisor + rem;
+                    return { op: 'div', n1: dividend, n2: divisor, ans: q, rem };
+                }
+            }
+            return { op: 'add', n1: 28, n2: 15, ans: 43 };
+        }
+
+        function generateNewProblems() {
+            readControlsToState();
+            state.problems = [];
+            for (let i = 0; i < state.totalCount; i++) {
+                state.problems.push(generateSingleProblem(state.operation, state.d1, state.d2, state.regroup));
+            }
+            renderWorksheet();
+        }
+
+        function getDigitsArray(num, totalPlaces) {
+            const str = String(num);
+            const arr = new Array(totalPlaces).fill('');
+            for (let i = 0; i < str.length; i++) {
+                const posFromRight = str.length - 1 - i;
+                if (posFromRight < totalPlaces) {
+                    arr[totalPlaces - 1 - posFromRight] = str[i];
+                }
+            }
+            return arr;
+        }
+
+        function computeAddSubDetails(prob, numCols) {
+            const d1Arr = getDigitsArray(prob.n1, numCols);
+            const d2Arr = getDigitsArray(prob.n2, numCols);
+            const ansArr = getDigitsArray(prob.ans, numCols);
+            const carryRow = new Array(numCols).fill('');
+            const borrowTopRow = new Array(numCols).fill('');
+            const borrowTenRow = new Array(numCols).fill('');
+
+            if (prob.op === 'add') {
+                let c = 0;
+                for (let col = numCols - 1; col >= 0; col--) {
+                    const v1 = parseInt(d1Arr[col] || '0', 10);
+                    const v2 = parseInt(d2Arr[col] || '0', 10);
+                    const sum = v1 + v2 + c;
+                    c = Math.floor(sum / 10);
+                    if (c > 0 && col - 1 >= 0) {
+                        carryRow[col - 1] = String(c);
+                    }
+                }
+            } else if (prob.op === 'sub') {
+                let work = d1Arr.map(x => parseInt(x || '0', 10));
+                for (let col = numCols - 1; col >= 0; col--) {
+                    const v2 = parseInt(d2Arr[col] || '0', 10);
+                    if (work[col] < v2 && col - 1 >= 0) {
+                        work[col - 1] -= 1;
+                        borrowTopRow[col - 1] = String(work[col - 1]);
+                        borrowTenRow[col] = '10';
+                        work[col] += 10;
+                    }
+                }
+            }
+            return { d1Arr, d2Arr, ansArr, carryRow, borrowTopRow, borrowTenRow };
+        }
+
+        function buildPlaceValueHeaderHTML(numCols, cellW, fontSize) {
+            if (state.boardStyle === 'minimal') return '';
+
+            if (state.boardStyle === 'guidelines') {
+                let cellsHTML = '';
+                for (let c = 0; c < numCols; c++) {
+                    const placeIndex = numCols - 1 - c;
+                    const isRightBorder = c < numCols - 1;
+                    const borderRight = isRightBorder ? '1.5px dashed #64748b' : 'none';
+                    cellsHTML += `
+                        <td style="width:${cellW}px; height:${Math.round(cellW * 0.52)}px; border:none; border-right:${borderRight}; background-color:#ffffff; color:#64748b; font-weight:700; font-size:${Math.round(fontSize * 0.48)}px; text-align:center; vertical-align:middle;">
+                            ${PLACE_SHORT[placeIndex] || ''}
+                        </td>
+                    `;
+                }
+                return `<tr>${cellsHTML}</tr>`;
+            }
+
+            let cellsHTML = '';
+            for (let c = 0; c < numCols; c++) {
+                const placeIndex = numCols - 1 - c;
+                const isOnes = placeIndex === 0;
+                const isTens = placeIndex === 1;
+                const isHundreds = placeIndex === 2;
+
+                let bgColor = '#ffffff';
+                let textColor = '#1e293b';
+
+                if (state.showColorCue) {
+                    if (isOnes) { bgColor = '#fff1f2'; textColor = '#be123c'; }
+                    else if (isTens) { bgColor = '#eff6ff'; textColor = '#1d4ed8'; }
+                    else if (isHundreds) { bgColor = '#f0fdf4'; textColor = '#15803d'; }
+                }
+
+                if (state.boardStyle === 'classic') {
+                    cellsHTML += `
+                        <td style="width:${cellW}px; height:${Math.round(cellW * 0.68)}px; border:1.5px solid #334155; background-color:${bgColor}; color:${textColor}; font-weight:800; font-size:${Math.round(fontSize * 0.56)}px; text-align:center; vertical-align:middle;">
+                            ${PLACE_NAMES[placeIndex] || ''}
+                        </td>
+                    `;
+                } else if (state.boardStyle === 'coins') {
+                    const coinVal = COIN_VALUES[placeIndex] || '1';
+                    cellsHTML += `
+                        <td style="width:${cellW}px; height:${Math.round(cellW * 0.9)}px; border:1.5px solid #334155; background-color:${bgColor}; text-align:center; vertical-align:middle; padding:2px;">
+                            <div style="font-size:${Math.round(fontSize * 0.44)}px; font-weight:800; color:${textColor}; line-height:1.1; margin-bottom:2px;">${PLACE_NAMES[placeIndex]}</div>
+                            <span style="display:inline-block; padding:1px 5px; border-radius:999px; border:1.5px solid #475569; background-color:#f1f5f9; color:#334155; font-size:${Math.round(fontSize * 0.4)}px; font-weight:900;">$${coinVal}</span>
+                        </td>
+                    `;
+                } else if (state.boardStyle === 'ribbon') {
+                    cellsHTML += `
+                        <td style="width:${cellW}px; height:${Math.round(cellW * 0.72)}px; border:1.5px solid #334155; background-color:#e2e8f0; color:#0f172a; font-weight:900; font-size:${Math.round(fontSize * 0.58)}px; text-align:center; vertical-align:middle;">
+                            <span style="display:inline-block; padding:1px 6px; background-color:#ffffff; border:1px solid #64748b; border-radius:4px;">${PLACE_NAMES[placeIndex]}</span>
+                        </td>
+                    `;
+                }
+            }
+
+            return `<tr>${cellsHTML}</tr>`;
+        }
+
+        function renderAddSubBoard(prob, index, sizing) {
+            const { cellW, cellH, fontSize } = sizing;
+            const maxInputDigits = Math.max(String(prob.n1).length, String(prob.n2).length, String(prob.ans).length);
+            const hasPotentialExtraCol = prob.op === 'add' && String(prob.ans).length > Math.max(String(prob.n1).length, String(prob.n2).length);
+            const numCols = Math.max(maxInputDigits, state.d1, state.d2) + (hasPotentialExtraCol ? 0 : (prob.op === 'add' && state.regroup !== 'none' ? 1 : 0));
+            const finalCols = Math.min(Math.max(numCols, 2), 5);
+
+            const details = computeAddSubDetails(prob, finalCols);
+            const opSymbol = prob.op === 'add' ? '＋' : '－';
+            
+            const isGuidelines = state.boardStyle === 'guidelines';
+            const outerBorder = isGuidelines ? 'none' : '1.5px solid #334155';
+
+            let rowsHTML = '';
+            rowsHTML += buildPlaceValueHeaderHTML(finalCols, cellW, fontSize);
+
+            // 進位/退位輔助格：即使是 guidelines 模式，只要勾選 showCarryBox 就顯示
+            if (state.showCarryBox) {
+                let auxCells = '';
+                for (let c = 0; c < finalCols; c++) {
+                    const isRightmost = c === finalCols - 1;
+                    const borderRight = isGuidelines ? (c < finalCols - 1 ? '1.5px dashed #64748b' : 'none') : '1.5px solid #334155';
+                    const borderStyle = isGuidelines ? `border:none; border-right:${borderRight};` : `border:${outerBorder};`;
+                    let innerContent = '';
+
+                    if (prob.op === 'add') {
+                        if (!isRightmost) {
+                            const carryVal = state.showAnswer ? details.carryRow[c] : '';
+                            const circleSize = Math.round(cellH * 0.56);
+                            innerContent = `
+                                <div style="width:${circleSize}px; height:${circleSize}px; line-height:${circleSize - 3}px; border-radius:50%; border:1.5px dashed #e11d48; margin:0 auto; color:#e11d48; font-weight:800; font-size:${Math.round(fontSize * 0.65)}px;">
+                                    ${carryVal}
+                                </div>
+                            `;
+                        }
+                    } else {
+                        const topVal = state.showAnswer ? details.borrowTopRow[c] : '';
+                        const tenVal = state.showAnswer ? details.borrowTenRow[c] : '';
+                        const dispVal = topVal || tenVal;
+                        innerContent = `
+                            <div style="width:${Math.round(cellW * 0.76)}px; height:${Math.round(cellH * 0.54)}px; line-height:${Math.round(cellH * 0.52)}px; border:1.5px dashed #2563eb; border-radius:6px; margin:0 auto; color:#1d4ed8; font-weight:800; font-size:${Math.round(fontSize * 0.6)}px;">
+                                ${dispVal}
+                            </div>
+                        `;
+                    }
+                    auxCells += `<td style="width:${cellW}px; height:${Math.round(cellH * 0.78)}px; ${borderStyle} background-color:#ffffff; text-align:center; vertical-align:middle;">${innerContent}</td>`;
+                }
+                rowsHTML += `<tr>${auxCells}</tr>`;
+            }
+
+            const formatDigit = (digit) => {
+                if (!digit) return '';
+                if (state.prefill === 'prefilled' || state.showAnswer) return `<span style="color:#0f172a; font-weight:800;">${digit}</span>`;
+                if (state.prefill === 'trace') return `<span style="color:#cbd5e1; font-weight:800;">${digit}</span>`;
+                return '';
+            };
+
+            const getCellBorder = (c) => {
+                if (!isGuidelines) return '1.5px solid #334155';
+                const isRightBorder = c < finalCols - 1;
+                return isRightBorder ? '1.5px dashed #64748b' : 'none';
+            };
+
+            // 第一行（被加數/被減數）
+            let row1Cells = '';
+            for (let c = 0; c < finalCols; c++) {
+                row1Cells += `
+                    <td style="width:${cellW}px; height:${cellH}px; border:${isGuidelines ? 'none' : outerBorder}; border-right:${getCellBorder(c)}; background-color:#ffffff; font-size:${fontSize}px; text-align:center; vertical-align:middle;">
+                        ${formatDigit(details.d1Arr[c])}
+                    </td>
+                `;
+            }
+            rowsHTML += `<tr>${row1Cells}</tr>`;
+
+            // 第二行（加數/減數）：運算符號放置在第二個數字左側的欄位外側或左緣
+            const secondNumFirstDigitIdx = details.d2Arr.findIndex(d => d !== '');
+            const opTargetCol = secondNumFirstDigitIdx > 0 ? secondNumFirstDigitIdx - 1 : 0;
+
+            let row2Cells = '';
+            for (let c = 0; c < finalCols; c++) {
+                const isOpCol = (c === opTargetCol);
+                const opHtml = isOpCol ? `<span style="position:absolute; left:-22px; top:50%; transform:translateY(-50%); font-weight:900; color:#0f172a; font-size:${Math.round(fontSize * 0.9)}px; width:20px; text-align:right;">${opSymbol}</span>` : '';
+                row2Cells += `
+                    <td style="width:${cellW}px; height:${cellH}px; border:${isGuidelines ? 'none' : outerBorder}; border-right:${getCellBorder(c)}; border-bottom:2.5px solid #0f172a; background-color:#ffffff; font-size:${fontSize}px; text-align:center; vertical-align:middle;">
+                        ${opHtml}${formatDigit(details.d2Arr[c])}
+                    </td>
+                `;
+            }
+            rowsHTML += `<tr>${row2Cells}</tr>`;
+
+            let ansCells = '';
+            for (let c = 0; c < finalCols; c++) {
+                const ansVal = state.showAnswer ? details.ansArr[c] : '';
+                ansCells += `
+                    <td style="width:${cellW}px; height:${cellH}px; border:${isGuidelines ? 'none' : outerBorder}; border-right:${getCellBorder(c)}; background-color:#ffffff; font-size:${fontSize}px; font-weight:900; color:#e11d48; text-align:center; vertical-align:middle;">
+                        ${ansVal}
+                    </td>
+                `;
+            }
+            rowsHTML += `<tr>${ansCells}</tr>`;
+
+            return `<table class="math-grid-table" style="border-collapse:collapse; margin:0 auto;">${rowsHTML}</table>`;
+        }
+
+        function renderMulBoard(prob, index, sizing) {
+            const { cellW, cellH, fontSize } = sizing;
+            const n1Str = String(prob.n1);
+            const n2Str = String(prob.n2);
+            const ansStr = String(prob.ans);
+            const mDigitsCount = n2Str.length;
+            const isMultiDigitMultiplier = mDigitsCount >= 2;
+
+            const maxDigits = Math.max(ansStr.length, n1Str.length + n2Str.length, 3);
+            const finalCols = Math.min(Math.max(maxDigits, 3), 6);
+            
+            const isGuidelines = state.boardStyle === 'guidelines';
+            const outerBorder = isGuidelines ? 'none' : '1.5px solid #475569';
+
+            const d1Arr = getDigitsArray(prob.n1, finalCols);
+            const d2Arr = getDigitsArray(prob.n2, finalCols);
+            const ansArr = getDigitsArray(prob.ans, finalCols);
+            const mDigitsRev = n2Str.split('').reverse().map(Number);
+
+            const mulCarryLayers = mDigitsRev.map((mDigit, mIdx) => {
+                const layerCarry = new Array(finalCols).fill('');
+                let cVal = 0;
+                for (let i = 0; i < n1Str.length; i++) {
+                    const col = finalCols - 1 - i;
+                    const v1 = parseInt(d1Arr[col] || '0', 10);
+                    const prod = v1 * mDigit + cVal;
+                    cVal = Math.floor(prod / 10);
+                    const targetCarryCol = col - mIdx - 1;
+                    if (cVal > 0 && targetCarryCol >= 0) {
+                        layerCarry[targetCarryCol] = String(cVal);
+                    }
+                }
+                return layerCarry;
+            });
+
+            const partialProducts = mDigitsRev.map((mDigit, mIdx) => {
+                const rawProd = prob.n1 * mDigit;
+                const shiftedVal = rawProd * Math.pow(10, mIdx);
+                const arr = getDigitsArray(shiftedVal, finalCols);
+                for (let z = 0; z < mIdx; z++) arr[finalCols - 1 - z] = '';
+                if (rawProd === 0 && finalCols - 1 - mIdx >= 0) arr[finalCols - 1 - mIdx] = '0';
+                return { mDigit, mIdx, rawProd, arr };
+            });
+
+            const formatDigit = (digit, color = '#0f172a') => {
+                if (!digit) return '';
+                if (state.prefill === 'prefilled' || state.showAnswer) return `<span style="color:${color}; font-weight:800;">${digit}</span>`;
+                if (state.prefill === 'trace') return `<span style="color:#cbd5e1; font-weight:800;">${digit}</span>`;
+                return '';
+            };
+
+            const getCellBorder = (c) => {
+                if (!isGuidelines) return '1.5px solid #334155';
+                const isRightBorder = c < finalCols - 1;
+                return isRightBorder ? '1.5px dashed #64748b' : 'none';
+            };
+
+            let rowsHTML = '';
+            rowsHTML += buildPlaceValueHeaderHTML(finalCols, cellW, fontSize);
+
+            // 多層進位輔助格：即使是 guidelines 模式，只要勾選 showCarryBox 就顯示
+            if (state.showCarryBox) {
+                for (let mIdx = mDigitsCount - 1; mIdx >= 0; mIdx--) {
+                    let carryCells = '';
+                    const layerColorObj = state.showColorCue ? MULTIPLIER_COLORS[mIdx % MULTIPLIER_COLORS.length] : { bg: '#ffffff', text: '#e11d48', border: '#e11d48' };
+
+                    for (let c = 0; c < finalCols; c++) {
+                        const isShadedInactive = c >= finalCols - 1 - mIdx;
+                        const highestCarryCol = finalCols - 1 - mIdx - n1Str.length;
+                        const isLeftUnused = c < highestCarryCol;
+                        const borderStyle = isGuidelines ? `border:none; border-right:${c < finalCols - 1 ? '1.5px dashed #64748b' : 'none'};` : `border:${outerBorder};`;
+
+                        if (isShadedInactive) {
+                            carryCells += `<td style="width:${cellW}px; height:24px; ${borderStyle} background-color:#cbd5e1;"></td>`;
+                        } else if (isLeftUnused) {
+                            carryCells += `<td style="width:${cellW}px; height:24px; ${borderStyle} background-color:#f1f5f9;"></td>`;
+                        } else {
+                            const cText = state.showAnswer ? mulCarryLayers[mIdx][c] : '';
+                            carryCells += `
+                                <td style="width:${cellW}px; height:24px; ${borderStyle} background-color:${layerColorObj.bg}; text-align:center; vertical-align:middle;">
+                                    <div style="width:20px; height:20px; border-radius:4px; border:1.5px dashed ${layerColorObj.text}; margin:0 auto; color:${layerColorObj.text}; font-weight:800; font-size:12px; line-height:18px;">${cText}</div>
+                                </td>
+                            `;
+                        }
+                    }
+                    rowsHTML += `<tr>${carryCells}</tr>`;
+                }
+            }
+
+            // 被乘數列
+            let r1 = '';
+            for (let c = 0; c < finalCols; c++) {
+                r1 += `<td style="width:${cellW}px; height:${cellH}px; border:${isGuidelines ? 'none' : outerBorder}; border-right:${getCellBorder(c)}; border-top:2.5px solid #0f172a; background-color:#ffffff; font-size:${fontSize}px; text-align:center; vertical-align:middle;">${formatDigit(d1Arr[c])}</td>`;
+            }
+            rowsHTML += `<tr>${r1}</tr>`;
+
+            // 乘數列：運算符號放置在最左側欄位的左側空白處
+            const secondNumFirstDigitIdx = d2Arr.findIndex(d => d !== '');
+            const mulOpCol = secondNumFirstDigitIdx > 0 ? secondNumFirstDigitIdx - 1 : 0;
+
+            let r2 = '';
+            for (let c = 0; c < finalCols; c++) {
+                const isOpCol = (c === mulOpCol);
+                const opHtml = isOpCol ? `<span style="position:absolute; left:-22px; top:50%; transform:translateY(-50%); font-weight:900; color:#0f172a; font-size:${Math.round(fontSize * 0.9)}px; width:20px; text-align:right;">×</span>` : '';
+                r2 += `
+                    <td style="width:${cellW}px; height:${cellH}px; border:${isGuidelines ? 'none' : outerBorder}; border-right:${getCellBorder(c)}; border-bottom:2.5px solid #0f172a; background-color:#ffffff; font-size:${fontSize}px; text-align:center; vertical-align:middle;">
+                        ${opHtml}${formatDigit(d2Arr[c])}
+                    </td>
+                `;
+            }
+            rowsHTML += `<tr>${r2}</tr>`;
+
+            // 部分積列
+            if (isMultiDigitMultiplier) {
+                partialProducts.forEach((pp, idx) => {
+                    const isLastPartial = idx === partialProducts.length - 1;
+                    const rowBottomBorder = (!state.showCarryBox && isLastPartial) ? '2.5px solid #0f172a' : (isGuidelines ? 'none' : '1.5px solid #334155');
+                    const layerColorObj = state.showColorCue ? MULTIPLIER_COLORS[pp.mIdx % MULTIPLIER_COLORS.length] : { bg: '#ffffff', text: '#0f172a' };
+                    let pCells = '';
+
+                    for (let c = 0; c < finalCols; c++) {
+                        const isShadedRight = c > finalCols - 1 - pp.mIdx;
+                        const isOpCol = (c === mulOpCol && isLastPartial);
+                        const plusHtml = isOpCol ? `<span style="position:absolute; left:-22px; top:50%; transform:translateY(-50%); font-weight:900; color:#0f172a; font-size:${Math.round(fontSize * 0.9)}px; width:20px; text-align:right;">＋</span>` : '';
+                        const cellBg = (state.showColorCue && !isShadedRight) ? layerColorObj.bg : (isShadedRight ? '#cbd5e1' : '#ffffff');
+
+                        if (isShadedRight) {
+                            pCells += `<td style="width:${cellW}px; height:${cellH}px; border:${outerBorder}; border-bottom:${rowBottomBorder}; background-color:${cellBg};"></td>`;
+                        } else {
+                            const val = state.showAnswer ? pp.arr[c] : '';
+                            pCells += `
+                                <td style="width:${cellW}px; height:${cellH}px; border:${isGuidelines ? 'none' : outerBorder}; border-right:${getCellBorder(c)}; border-bottom:${rowBottomBorder}; background-color:${cellBg}; font-size:${fontSize}px; font-weight:800; color:${layerColorObj.text}; text-align:center; vertical-align:middle;">
+                                    ${plusHtml}${val}
+                                </td>
+                            `;
+                        }
+                    }
+                    rowsHTML += `<tr>${pCells}</tr>`;
+                });
+            }
+
+            // 最終答案（積）
+            let ansCells = '';
+            for (let c = 0; c < finalCols; c++) {
+                const val = state.showAnswer ? ansArr[c] : '';
+                ansCells += `<td style="width:${cellW}px; height:${cellH}px; border:${isGuidelines ? 'none' : outerBorder}; border-right:${getCellBorder(c)}; background-color:#ffffff; font-size:${fontSize}px; font-weight:900; color:#e11d48; text-align:center; vertical-align:middle;">${val}</td>`;
+            }
+            rowsHTML += `<tr>${ansCells}</tr>`;
+
+            return `<table class="math-grid-table" style="border-collapse:collapse; margin:0 auto;">${rowsHTML}</table>`;
+        }
+
+        function renderDivBoard(prob, index, sizing) {
+            const { cellW, cellH, fontSize } = sizing;
+            const dividendStr = String(prob.n1);
+            const divisorStr = String(prob.n2);
+            const numCols = dividendStr.length;
+            const divCols = divisorStr.length;
+            const singleDivW = Math.round(cellW * (divCols > 1 ? 0.82 : 0.88));
+            
+            const isGuidelines = state.boardStyle === 'guidelines';
+
+            const dDigits = dividendStr.split('').map(Number);
+            const divisorDigits = divisorStr.split('');
+            const divisor = prob.n2;
+            const qArr = new Array(numCols).fill('');
+
+            let steps = [];
+            let currentVal = 0;
+            for (let i = 0; i < numCols; i++) {
+                currentVal = currentVal * 10 + dDigits[i];
+                if (currentVal >= divisor || i === numCols - 1 || steps.length > 0) {
+                    const qDigit = Math.floor(currentVal / divisor);
+                    const prod = qDigit * divisor;
+                    const rem = currentVal - prod;
+                    qArr[i] = String(qDigit);
+                    steps.push({ colIndex: i, currentVal, qDigit, prod, rem, nextDigit: i + 1 < numCols ? dDigits[i + 1] : null });
+                    currentVal = rem;
+                }
+            }
+
+            const formatPrefill = (val) => {
+                if (val === '' || val === undefined || val === null) return '';
+                if (state.prefill === 'prefilled' || state.showAnswer) return `<span style="color:#0f172a; font-weight:800;">${val}</span>`;
+                if (state.prefill === 'trace') return `<span style="color:#cbd5e1; font-weight:800;">${val}</span>`;
+                return '';
+            };
+
+            const getDivCellBorder = (c) => {
+                if (!isGuidelines) return '1.5px solid #334155';
+                const isRightBorder = c < numCols - 1;
+                return isRightBorder ? '1.5px dashed #64748b' : 'none';
+            };
+
+            let rowsHTML = '';
+            if (state.boardStyle !== 'minimal') {
+                let hCells = `<td colspan="${divCols}" style="width:${singleDivW * divCols}px; height:${Math.round(cellH * 0.65)}px; border:none; background-color:#ffffff;"></td>`;
+                for (let c = 0; c < numCols; c++) {
+                    const placeIdx = numCols - 1 - c;
+                    const borderRight = c < numCols - 1 ? '1.5px dashed #64748b' : 'none';
+                    hCells += `<td style="width:${cellW}px; height:${Math.round(cellH * 0.65)}px; border:none; border-right:${borderRight}; background-color:#ffffff; color:#64748b; font-size:${Math.round(fontSize * 0.52)}px; font-weight:800; text-align:center;">${PLACE_SHORT[placeIdx] || ''}</td>`;
+                }
+                rowsHTML += `<tr>${hCells}</tr>`;
+            }
+
+            let qCells = `<td colspan="${divCols}" style="width:${singleDivW * divCols}px; height:${cellH}px; border:none; background-color:#ffffff;"></td>`;
+            for (let c = 0; c < numCols; c++) {
+                const qVal = state.showAnswer ? qArr[c] : '';
+                const borderRight = c < numCols - 1 ? '1.5px dashed #64748b' : 'none';
+                qCells += `<td style="width:${cellW}px; height:${cellH}px; border:none; border-right:${borderRight}; border-bottom:2.5px solid #0f172a; background-color:#ffffff; font-size:${fontSize}px; font-weight:900; color:#1d4ed8; text-align:center;">${qVal}</td>`;
+            }
+            rowsHTML += `<tr>${qCells}</tr>`;
+
+            let divCells = '';
+            for (let d = 0; d < divCols; d++) {
+                const isLastDivCol = d === divCols - 1;
+                const rightBorder = isLastDivCol ? '3.5px solid #0f172a' : '1.5px dashed #94a3b8';
+                divCells += `<td style="width:${singleDivW}px; height:${cellH}px; border:none; border-right:${rightBorder}; background-color:#ffffff; font-size:${fontSize}px; text-align:center;">${formatPrefill(divisorDigits[d])}</td>`;
+            }
+            for (let c = 0; c < numCols; c++) {
+                divCells += `<td style="width:${cellW}px; height:${cellH}px; border:none; border-right:${getDivCellBorder(c)}; border-top:2.5px solid #0f172a; background-color:#ffffff; font-size:${fontSize}px; text-align:center;">${formatPrefill(dDigits[c])}</td>`;
+            }
+            rowsHTML += `<tr>${divCells}</tr>`;
+
+            steps.forEach((st, sIdx) => {
+                let prodCells = `<td colspan="${divCols}" style="width:${singleDivW * divCols}px; height:${cellH}px; border:none; background-color:#ffffff;"></td>`;
+                const prodStr = String(st.prod);
+
+                for (let c = 0; c < numCols; c++) {
+                    let cellDigit = '';
+                    const offset = st.colIndex - c;
+                    if (offset >= 0 && offset < prodStr.length) cellDigit = prodStr[prodStr.length - 1 - offset];
+                    const bottomB = c <= st.colIndex + (st.nextDigit !== null ? 1 : 0) ? '2.5px solid #0f172a' : (isGuidelines ? 'none' : '1.5px solid #334155');
+                    const borderRight = c < numCols - 1 ? '1.5px dashed #64748b' : 'none';
+                    prodCells += `<td style="width:${cellW}px; height:${cellH}px; border:none; border-right:${borderRight}; border-bottom:${bottomB}; background-color:#ffffff; font-size:${fontSize}px; font-weight:800; color:#e11d48; text-align:center;">${state.showAnswer ? cellDigit : ''}</td>`;
+                }
+                rowsHTML += `<tr>${prodCells}</tr>`;
+
+                const isLastStep = sIdx === steps.length - 1;
+                let remCells = `<td colspan="${divCols}" style="width:${singleDivW * divCols}px; height:${cellH}px; border:none; background-color:#ffffff;"></td>`;
+                const remStr = String(st.rem);
+
+                for (let c = 0; c < numCols; c++) {
+                    let rDigit = '';
+                    const offsetFromStepCol = st.colIndex - c;
+
+                    if (offsetFromStepCol >= 0 && offsetFromStepCol < remStr.length) {
+                        if (isLastStep || st.rem > 0) {
+                            rDigit = remStr[remStr.length - 1 - offsetFromStepCol];
+                        }
+                    } else if (!isLastStep && c === st.colIndex + 1 && st.nextDigit !== null) {
+                        rDigit = String(st.nextDigit);
+                    }
+
+                    const borderRight = c < numCols - 1 ? '1.5px dashed #64748b' : 'none';
+                    remCells += `<td style="width:${cellW}px; height:${cellH}px; border:none; border-right:${borderRight}; background-color:#ffffff; font-size:${fontSize}px; font-weight:800; color:#15803d; text-align:center;">${state.showAnswer ? rDigit : ''}</td>`;
+                }
+                rowsHTML += `<tr>${remCells}</tr>`;
+            });
+
+            return `<table class="math-grid-table" style="border-collapse:collapse; margin:0 auto;">${rowsHTML}</table>`;
+        }
+
+        function getSizingConfig() {
+            const cols = state.cols;
+            const enlarge = state.enlargeGrid;
+            let cellW = 38, cellH = 38, fontSize = 20;
+
+            if (cols === 1) { cellW = enlarge ? 58 : 48; cellH = enlarge ? 56 : 46; fontSize = enlarge ? 28 : 24; }
+            else if (cols === 2) { cellW = enlarge ? 48 : 38; cellH = enlarge ? 46 : 36; fontSize = enlarge ? 24 : 20; }
+            else if (cols === 3) { cellW = enlarge ? 36 : 30; cellH = enlarge ? 36 : 30; fontSize = enlarge ? 19 : 16; }
+            else { cellW = enlarge ? 30 : 25; cellH = enlarge ? 30 : 26; fontSize = enlarge ? 16 : 14; }
+
+            if (state.operation === 'div' || (state.operation === 'mul' && state.d2 >= 2)) {
+                cellH = Math.round(cellH * 0.86);
+            }
+            return { cellW, cellH, fontSize };
+        }
+
+        function computeProblemsPerPage() {
+            const isTallBoard = state.operation === 'div' || (state.operation === 'mul' && state.d2 >= 2);
+            let maxRowsPerPage = state.enlargeGrid ? (isTallBoard ? 2 : 3) : (isTallBoard ? 3 : 4);
+            return state.cols * maxRowsPerPage;
+        }
+
+        function formatHorizontalEquation(prob) {
+            const sym = prob.op === 'add' ? '＋' : (prob.op === 'sub' ? '－' : (prob.op === 'mul' ? '×' : '÷'));
+            let ansPart = '';
+            if (state.showAnswer) {
+                if (prob.op === 'div' && prob.rem > 0) ansPart = `<span style="color:#e11d48; font-weight:900; text-decoration:underline;">${prob.ans} … ${prob.rem}</span>`;
+                else ansPart = `<span style="color:#e11d48; font-weight:900; text-decoration:underline;">${prob.ans}</span>`;
+            }
+            return `${prob.n1} ${sym} ${prob.n2} ＝ ${ansPart}`;
+        }
+
+        function renderProblemCardHTML(prob, idx, sizing) {
+            let boardHTML = '';
+            if (prob.op === 'add' || prob.op === 'sub') boardHTML = renderAddSubBoard(prob, idx, sizing);
+            else if (prob.op === 'mul') boardHTML = renderMulBoard(prob, idx, sizing);
+            else if (prob.op === 'div') boardHTML = renderDivBoard(prob, idx, sizing);
+
+            const eqHTML = state.showHorizontal ? `
+                <div style="margin-bottom:8px; font-size:${Math.max(14, Math.round(sizing.fontSize * 0.78))}px; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:6px;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background-color:#e0e7ff; color:#3730a3; font-size:12px; font-weight:900;">${idx + 1}</span>
+                    <span>${formatHorizontalEquation(prob)}</span>
+                </div>
+            ` : `<div style="margin-bottom:6px; font-size:13px; font-weight:800; color:#3730a3;">第 ${idx + 1} 題</div>`;
+
+            return `
+                <div style="border:1.5px solid #cbd5e1; border-radius:10px; padding:${state.enlargeGrid ? '12px 10px' : '8px'}; background-color:#ffffff; display:flex; flex-direction:column; justify-content:space-between;">
+                    ${eqHTML}
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">${boardHTML}</div>
+                </div>
+            `;
+        }
+
+        function renderWorksheet() {
+            readControlsToState();
+            const container = document.getElementById('worksheet-container');
+            const sizing = getSizingConfig();
+            const perPage = computeProblemsPerPage();
+            const totalPages = Math.max(1, Math.ceil(state.problems.length / perPage));
+
+            document.getElementById('page-info-badge').textContent = `共 ${totalPages} 頁 (${state.problems.length} 題)`;
+
+            let allPagesHTML = '';
+            for (let p = 0; p < totalPages; p++) {
+                const pageProblems = state.problems.slice(p * perPage, (p + 1) * perPage);
+                const colWidthPct = Math.floor(100 / state.cols);
+
+                let gridRowsHTML = '';
+                for (let i = 0; i < pageProblems.length; i += state.cols) {
+                    let rowTds = '';
+                    for (let c = 0; c < state.cols; c++) {
+                        const probIndex = p * perPage + i + c;
+                        const prob = pageProblems[i + c];
+                        if (prob) {
+                            rowTds += `<td style="width:${colWidthPct}%; padding:6px; vertical-align:top;">${renderProblemCardHTML(prob, probIndex, sizing)}</td>`;
+                        } else {
+                            rowTds += `<td style="width:${colWidthPct}%; padding:6px;"></td>`;
+                        }
+                    }
+                    gridRowsHTML += `<tr>${rowTds}</tr>`;
+                }
+
+                allPagesHTML += `
+                    <div class="a4-page">
+                        <div style="border-bottom:2px solid #1e293b; padding-bottom:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-end;">
+                            <div>
+                                <h2 style="font-size:20px; font-weight:900; color:#0f172a; margin:0;">
+                                    ${state.title}
+                                    ${state.showAnswer ? '<span style="font-size:13px; color:#e11d48; margin-left:8px;">【教師解答卷】</span>' : ''}
+                                </h2>
+                            </div>
+                            <div style="font-size:13px; font-weight:700; color:#334155;">
+                                日期：____月____日　姓名：____________　得分：________
+                            </div>
+                        </div>
+
+                        <div style="flex:1;">
+                            <table style="width:100%; border-collapse:collapse;">${gridRowsHTML}</table>
+                        </div>
+
+                        <div style="margin-top:auto; padding-top:6px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+                            <span>數學直式定位板練習系統</span>
+                            <span>第 ${p + 1} 頁 / 共 ${totalPages} 頁</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = allPagesHTML;
+        }
+
+        function toggleCustomProblemModal() {
+            const modal = document.getElementById('custom-modal');
+            if (modal.classList.contains('hidden')) {
+                const listEl = document.getElementById('custom-problem-list');
+                let html = '';
+                state.problems.forEach((p, idx) => {
+                    html += `
+                        <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                            <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center shrink-0">${idx + 1}</span>
+                            <input type="number" id="edit-n1-${idx}" value="${p.n1}" class="w-24 rounded border border-slate-300 px-2 py-1 text-sm font-bold text-center">
+                            <select id="edit-op-${idx}" class="rounded border border-slate-300 px-2 py-1 text-sm font-bold">
+                                <option value="add" ${p.op === 'add' ? 'selected' : ''}>＋</option>
+                                <option value="sub" ${p.op === 'sub' ? 'selected' : ''}>－</option>
+                                <option value="mul" ${p.op === 'mul' ? 'selected' : ''}>×</option>
+                                <option value="div" ${p.op === 'div' ? 'selected' : ''}>÷</option>
+                            </select>
+                            <input type="number" id="edit-n2-${idx}" value="${p.n2}" class="w-24 rounded border border-slate-300 px-2 py-1 text-sm font-bold text-center">
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = html;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function saveCustomProblems() {
+            state.problems.forEach((p, idx) => {
+                const n1 = parseInt(document.getElementById(`edit-n1-${idx}`).value, 10) || 1;
+                const n2 = Math.max(1, parseInt(document.getElementById(`edit-n2-${idx}`).value, 10) || 1);
+                const op = document.getElementById(`edit-op-${idx}`).value;
+                p.n1 = n1; p.n2 = n2; p.op = op;
+                if (op === 'add') p.ans = n1 + n2;
+                else if (op === 'sub') p.ans = n1 - n2;
+                else if (op === 'mul') p.ans = n1 * n2;
+                else if (op === 'div') { p.ans = Math.floor(n1 / n2); p.rem = n1 % n2; }
+            });
+            toggleCustomProblemModal();
+            renderWorksheet();
+            showToast('已更新自訂題目！');
+        }
+
+        function exportToWord() {
+            const content = document.getElementById('worksheet-container').innerHTML;
+            const filename = `${state.title}${state.showAnswer ? '_解答卷' : ''}.doc`;
+            const wordHTML = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset="utf-8"><title>${state.title}</title>
+                <style>
+                    @page { size: 21cm 29.7cm; margin: 1.2cm 1.4cm; }
+                    body { font-family: 'Microsoft JhengHei', 'Noto Sans TC', Arial, sans-serif; }
+                    .a4-page { page-break-after: always; }
+                    table { border-collapse: collapse; }
+                    td, th { text-align: center; vertical-align: middle; }
+                </style>
+                </head><body>${content}
+<!-- === 學障教學大廳：通用浮動返回鈕 === -->
+<style id="floating-lobby-style">
+@media print { .floating-lobby-btn { display: none !important; } }
+.floating-lobby-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #0f172a;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 8px 10px -6px rgba(15, 23, 42, 0.3);
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.floating-lobby-btn:hover {
+  background: #2563eb;
+  color: #ffffff !important;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 28px -4px rgba(37, 99, 235, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.floating-lobby-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .floating-lobby-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+</style>
+<a href="index.html" class="floating-lobby-btn" title="返回學障教學大廳首頁" aria-label="返回教學大廳首頁">
+  <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+  <span>返回大廳首頁</span>
+</a>
+
+</body></html>
+            `;
+            const blob = new Blob(['\ufeff', wordHTML], { type: 'application/msword;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = filename;
+            document.body.appendChild(link); link.click();
+            document.body.removeChild(link); URL.revokeObjectURL(url);
+            showToast(`已下載 Word 檔案：${filename}`);
+        }
+
+        async function exportToPDF() {
+            const btn = document.getElementById('btn-pdf');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>產生 PDF 中...</span>`;
+
+            try {
+                const element = document.getElementById('worksheet-container');
+                const filename = `${state.title}${state.showAnswer ? '_解答卷' : ''}.pdf`;
+                const opt = {
+                    margin: 0, filename: filename,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+                await html2pdf().set(opt).from(element).save();
+                showToast(`已成功下載 PDF：${filename}`);
+            } catch (err) {
+                console.error(err);
+                showToast('PDF 產生失敗，建議點擊「直接列印」另存 PDF');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        }
+
+        window.onload = function () {
+            syncControlsFromState();
+            generateNewProblems();
+        };
+    </script>
+</body>
+</html>
