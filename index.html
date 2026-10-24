@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學障協會學伴計畫督導會議 - 雅翔自製教學網頁大廳</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -12px rgba(79, 70, 229, 0.2), 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+        }
+        .preview-img-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        .preview-img-wrapper img {
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-shadow:hover .preview-img-wrapper img {
+            transform: scale(1.05);
+        }
+        .badge-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- 頂端專案導航與識別欄 -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2 py-0.5 rounded-full">
+                            督導會議精選教材
+                        </span>
+                        <span class="text-xs text-slate-500 hidden sm:inline">中華民國學習障礙協會 ｜ 大專學伴計畫</span>
+                    </div>
+                    <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
+                        雅翔自製特教適性教學網頁大廳
+                    </h1>
+                </div>
+            </div>
+
+            <!-- 頂部快速功能 -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="#pedagogy-section" class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                    <span>督導與教學理念</span>
+                </a>
+                <a href="#companion-guide" class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/60 transition">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>學伴伴讀心法</span>
+                </a>
+                <button onclick="scrollToTop()" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="回到頁首">
+                    <i class="fa-solid fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero 展覽區塊 -->
+    <section class="relative overflow-hidden bg-gradient-to-b from-indigo-900 via-slate-900 to-slate-900 text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+        <!-- 背景裝飾幾何圖形 -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-indigo-500 filter blur-3xl"></div>
+            <div class="absolute top-1/2 -right-24 w-96 h-96 rounded-full bg-purple-500 filter blur-3xl"></div>
+        </div>
+
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-medium text-indigo-200 mb-5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 badge-pulse"></span>
+                <span>學習障礙學伴計畫 ｜ 督導研習與教學演示專用大廳</span>
+            </div>
+            
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white mb-5 leading-tight">
+                以認知鷹架賦能學習，讓特教學童看見自信
+            </h2>
+            
+            <p class="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed mb-8">
+                本數位教材大廳收錄 <strong class="text-white font-bold">雅翔老師</strong> 為學伴計畫量身原創設計的 <strong class="text-amber-300 font-bold">7 套適性輔助教學工具</strong>。涵蓋語文閱讀推論、情緒創意寫作、動態視覺注意力訓練、多位數乘法步驟拆解、直式定位板出題系統、SVG 比較量線段圖及長度滑動尺。全面落實通用學習設計（UDL），降低工作記憶負荷，支援學伴一對一與資源班精緻教學。
+            </p>
+
+            <!-- 核心指標統計 -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-black text-amber-400">7 套</div>
+                    <div class="text-xs text-slate-300 mt-1 font-medium">原創適性互動工具</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-black text-sky-400">3 大</div>
+                    <div class="text-xs text-slate-300 mt-1 font-medium">閱讀・專注・數學領域</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-black text-emerald-400">100%</div>
+                    <div class="text-xs text-slate-300 mt-1 font-medium">步驟拆解與視覺鷹架</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-black text-purple-400">Word/PDF</div>
+                    <div class="text-xs text-slate-300 mt-1 font-medium">即時列印作業單與解答</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 快速篩選與搜尋工具列 -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200/80 p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- 分類標籤頁 -->
+            <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0" id="filter-tabs">
+                <button onclick="setFilter('all', this)" class="filter-btn active-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 text-white shadow-sm transition whitespace-nowrap">
+                    全部教材 (<span id="count-all">7</span>)
+                </button>
+                <button onclick="setFilter('reading', this)" class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition whitespace-nowrap">
+                    📖 語文閱讀與寫作 (2)
+                </button>
+                <button onclick="setFilter('attention', this)" class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition whitespace-nowrap">
+                    🎯 專注力與認知訓練 (1)
+                </button>
+                <button onclick="setFilter('math', this)" class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition whitespace-nowrap">
+                    📐 數學運算與表徵輔具 (4)
+                </button>
+            </div>
+
+            <!-- 關鍵字搜尋框 -->
+            <div class="relative w-full md:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    oninput="handleSearch()"
+                    placeholder="搜尋教材名稱、認知盲點、特教標籤..." 
+                    class="w-full pl-10 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+                >
+                <button 
+                    id="clear-search-btn" 
+                    onclick="clearSearch()" 
+                    class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs p-1"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 教學網頁卡片展示清單 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+        
+        <!-- 當前篩選資訊列 -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="text-sm text-slate-500 font-medium">
+                顯示符合條件的教學網頁：<strong class="text-indigo-600 font-bold text-base" id="visible-count">7</strong> / 7 套
+            </div>
+            <div class="text-xs text-slate-400">
+                💡 點擊網頁卡片、標題或「進入網頁」皆可直接前往各教材
+            </div>
+        </div>
+
+        <!-- 網頁網格 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7" id="cards-container">
+
+            <!-- Card 1: Alike 閱讀思維九宮格 -->
+            <article class="tool-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden card-shadow flex flex-col"
+                     data-category="reading"
+                     data-title="Alike 閱讀思維九宮格 動畫閱讀理解 觀察 推論 找證據"
+                     data-tags="語文 閱讀理解 特教適性 認知鷹架 語音朗讀 IEP評量 西班牙短片 Alike">
+                <!-- 預覽縮圖 -->
+                <div class="preview-img-wrapper h-52 bg-amber-50 border-b border-slate-100 relative group cursor-pointer" onclick="openPreviewModal(0)">
+                    <img src="assets/previews/preview-alike-reading.png" alt="Alike 閱讀思維九宮格畫面預覽" class="w-full h-full object-cover object-top" loading="lazy">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
+                        <span class="px-3 py-1.5 bg-white/95 rounded-xl text-xs font-bold text-slate-800 shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600"></i> 放大預覽畫面
+                        </span>
+                        <a href="Alike 閱讀思維九宮格.html" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟教材
+                        </a>
+                    </div>
+                    <span class="absolute top-3 left-3 px-3 py-1 bg-amber-500/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm">
+                        📖 語文閱讀
+                    </span>
+                    <span class="absolute bottom-3 right-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-mono rounded-md">
+                        Alike 閱讀思維九宮格.html
+                    </span>
+                </div>
+
+                <!-- 卡片內容 -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                            三步思維認知鷹架
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+                            🔊 語音念讀支援
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-snug hover:text-indigo-600 transition">
+                        <a href="Alike 閱讀思維九宮格.html">《Alike 大同小異》閱讀思維九宮格</a>
+                    </h3>
+
+                    <p class="text-xs text-slate-500 mb-4 font-medium">
+                        適用對象：國小中高年級、閱讀理解困難學童、IEP 個別化評量
+                    </p>
+
+                    <!-- 教學設計與鷹架重點 -->
+                    <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 text-slate-600 mb-5 border border-slate-100 flex-grow">
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold shrink-0">🎯 困境痛點：</span>
+                            <span>學障學童常受困於大量文字解碼，面對閱讀推論常無從著手、缺乏思考結構。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-indigo-600 font-bold shrink-0">💡 創新解方：</span>
+                            <span>採用無字動畫短片《Alike》，建構「1. 仔細觀察 ➔ 2. 合理推論 ➔ 3. 尋找證據」思維鷹架，並支援自動產製個別化學習報告。</span>
+                        </div>
+                    </div>
+
+                    <!-- 標籤 -->
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#觀察推論</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#去文字解碼</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#IEP評量檔案</span>
+                    </div>
+
+                    <!-- 操作按鈕 -->
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mt-auto">
+                        <button onclick="openPreviewModal(0)" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-eye"></i> 教學導覽
+                        </button>
+                        <a href="Alike 閱讀思維九宮格.html" class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                            <span>進入網頁</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 2: Alike故事心情與創意寫作 -->
+            <article class="tool-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden card-shadow flex flex-col"
+                     data-category="reading"
+                     data-title="Alike故事心情與創意寫作九宮格 寫作鷹架 情緒詞彙庫 特教適性"
+                     data-tags="語文 創意寫作 情緒詞彙 寫作鷹架 特教 九宮格連線 成果報告">
+                <!-- 預覽縮圖 -->
+                <div class="preview-img-wrapper h-52 bg-sky-50 border-b border-slate-100 relative group cursor-pointer" onclick="openPreviewModal(1)">
+                    <img src="assets/previews/preview-alike-writing.png" alt="Alike故事心情與創意寫作畫面預覽" class="w-full h-full object-cover object-top" loading="lazy">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
+                        <span class="px-3 py-1.5 bg-white/95 rounded-xl text-xs font-bold text-slate-800 shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600"></i> 放大預覽畫面
+                        </span>
+                        <a href="Alike故事心情與創意寫作.html" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟教材
+                        </a>
+                    </div>
+                    <span class="absolute top-3 left-3 px-3 py-1 bg-sky-600/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm">
+                        ✍️ 創意寫作
+                    </span>
+                    <span class="absolute bottom-3 right-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-mono rounded-md">
+                        Alike故事心情與創意寫作.html
+                    </span>
+                </div>
+
+                <!-- 卡片內容 -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">
+                            寫作鷹架卡
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 border border-pink-200">
+                            情緒色彩轉化
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-snug hover:text-indigo-600 transition">
+                        <a href="Alike故事心情與創意寫作.html">《Alike》故事心情與創意寫作九宮格</a>
+                    </h3>
+
+                    <p class="text-xs text-slate-500 mb-4 font-medium">
+                        適用對象：國小各年級、寫作畏難、語彙提取困難學童、大專學伴作文陪讀
+                    </p>
+
+                    <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 text-slate-600 mb-5 border border-slate-100 flex-grow">
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold shrink-0">🎯 困境痛點：</span>
+                            <span>書寫表達障礙 (Dysgraphia) 學童常面臨提筆無言、形容詞彙貧乏與篇章結構紊亂。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-indigo-600 font-bold shrink-0">💡 創新解方：</span>
+                            <span>以小男孩身上的色彩起伏為起點，將作文拆解為 9 格任務卡與即時詞彙庫提示，自由連線降低壓力。</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#寫作減壓</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#詞庫鷹架</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#寫作成果單</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mt-auto">
+                        <button onclick="openPreviewModal(1)" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-eye"></i> 教學導覽
+                        </button>
+                        <a href="Alike故事心情與創意寫作.html" class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                            <span>進入網頁</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 3: 動態舒爾特方格 -->
+            <article class="tool-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden card-shadow flex flex-col"
+                     data-category="attention"
+                     data-title="動態舒爾特方格產生器 Dynamic Schulte Table 專注力 動態視覺反應 視覺追蹤"
+                     data-tags="專注力 注意力訓練 視覺搜尋 周邊視野 ADHD 舒爾特方格 動態換位 語音朗讀">
+                <!-- 預覽縮圖 -->
+                <div class="preview-img-wrapper h-52 bg-indigo-50 border-b border-slate-100 relative group cursor-pointer" onclick="openPreviewModal(2)">
+                    <img src="assets/previews/preview-schulte.png" alt="動態舒爾特方格畫面預覽" class="w-full h-full object-cover object-top" loading="lazy">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
+                        <span class="px-3 py-1.5 bg-white/95 rounded-xl text-xs font-bold text-slate-800 shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600"></i> 放大預覽畫面
+                        </span>
+                        <a href="動態舒爾特方格.html" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟教材
+                        </a>
+                    </div>
+                    <span class="absolute top-3 left-3 px-3 py-1 bg-violet-600/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm">
+                        🎯 專注力訓練
+                    </span>
+                    <span class="absolute bottom-3 right-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-mono rounded-md">
+                        動態舒爾特方格.html
+                    </span>
+                </div>
+
+                <!-- 卡片內容 -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-violet-50 text-violet-800 border border-violet-200">
+                            視覺搜尋與追蹤
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            ⚡ 動態換位模式
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-snug hover:text-indigo-600 transition">
+                        <a href="動態舒爾特方格.html">動態舒爾特方格產生器</a>
+                    </h3>
+
+                    <p class="text-xs text-slate-500 mb-4 font-medium">
+                        適用對象：注意力不集中、閱讀容易跳字漏行、視覺搜尋較慢之特教學童
+                    </p>
+
+                    <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 text-slate-600 mb-5 border border-slate-100 flex-grow">
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold shrink-0">🎯 困境痛點：</span>
+                            <span>眼球控制協調差、周邊視野狹窄，導致課堂抓不住重點、看書容易疲倦。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-indigo-600 font-bold shrink-0">💡 創新解方：</span>
+                            <span>支援 3×3 至 7×7 階梯挑戰，獨創「動態隨機換位模式」鍛鍊眼球動態追蹤極限，含音效與計時榜。</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#課前暖身</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#周邊視野擴展</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#即時音效反饋</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mt-auto">
+                        <button onclick="openPreviewModal(2)" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-eye"></i> 教學導覽
+                        </button>
+                        <a href="動態舒爾特方格.html" class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                            <span>進入網頁</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 4: 多位數乘法 一步一步練習 -->
+            <article class="tool-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden card-shadow flex flex-col"
+                     data-category="math"
+                     data-title="多位數乘法 一步一步練習 乘法直式 工作記憶減負 隨機出題 提示系統"
+                     data-tags="數學 乘法 步驟拆解 工作記憶 特教輔具 直式運算 即時檢誤">
+                <!-- 預覽縮圖 -->
+                <div class="preview-img-wrapper h-52 bg-slate-100 border-b border-slate-100 relative group cursor-pointer" onclick="openPreviewModal(3)">
+                    <img src="assets/previews/preview-multiplication.png" alt="多位數乘法一步一步練習畫面預覽" class="w-full h-full object-cover object-top" loading="lazy">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
+                        <span class="px-3 py-1.5 bg-white/95 rounded-xl text-xs font-bold text-slate-800 shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600"></i> 放大預覽畫面
+                        </span>
+                        <a href="多位數乘法 一步一步練習.html" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟教材
+                        </a>
+                    </div>
+                    <span class="absolute top-3 left-3 px-3 py-1 bg-blue-600/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm">
+                        ✖️ 乘法運算
+                    </span>
+                    <span class="absolute bottom-3 right-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-mono rounded-md">
+                        多位數乘法 一步一步練習.html
+                    </span>
+                </div>
+
+                <!-- 卡片內容 -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                            工作記憶減負理論
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            💡 智慧步驟提示
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-snug hover:text-indigo-600 transition">
+                        <a href="多位數乘法 一步一步練習.html">多位數乘法 一步一步算</a>
+                    </h3>
+
+                    <p class="text-xs text-slate-500 mb-4 font-medium">
+                        適用對象：國小三至六年級、直式乘法常忘記進位、運算步驟混淆學童
+                    </p>
+
+                    <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 text-slate-600 mb-5 border border-slate-100 flex-grow">
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold shrink-0">🎯 困境痛點：</span>
+                            <span>多位數直式乘法需要同時記進位、對位與乘加，工作記憶超載是錯誤的主要來源。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-indigo-600 font-bold shrink-0">💡 創新解方：</span>
+                            <span>將直式乘法精確拆解為單步提問與驗證，動態高亮當前計算位置與進位，讓孩子聚焦單一任務。</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#直式拆解</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#減輕記憶負荷</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#自訂隨機題目</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mt-auto">
+                        <button onclick="openPreviewModal(3)" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-eye"></i> 教學導覽
+                        </button>
+                        <a href="多位數乘法 一步一步練習.html" class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                            <span>進入網頁</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 5: 直式定位版題目產生器-雅翔設計 -->
+            <article class="tool-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden card-shadow flex flex-col"
+                     data-category="math"
+                     data-title="數學直式定位板出題產生器 雅翔設計 加減乘除 多位數 多層進位 Word PDF"
+                     data-tags="數學 定位板 出題工具 加減乘除 直式對齊 特教學習單 Word匯出 PDF列印">
+                <!-- 預覽縮圖 -->
+                <div class="preview-img-wrapper h-52 bg-slate-50 border-b border-slate-100 relative group cursor-pointer" onclick="openPreviewModal(4)">
+                    <img src="assets/previews/preview-place-value.png" alt="直式定位版出題產生器畫面預覽" class="w-full h-full object-cover object-top" loading="lazy">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
+                        <span class="px-3 py-1.5 bg-white/95 rounded-xl text-xs font-bold text-slate-800 shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600"></i> 放大預覽畫面
+                        </span>
+                        <a href="直式定位版題目產生器-雅翔設計.html" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟教材
+                        </a>
+                    </div>
+                    <span class="absolute top-3 left-3 px-3 py-1 bg-indigo-700/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm">
+                        🖨 出題輔具
+                    </span>
+                    <span class="absolute bottom-3 right-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-mono rounded-md">
+                        直式定位版題目產生器-雅翔設計.html
+                    </span>
+                </div>
+
+                <!-- 卡片內容 -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">
+                            加減乘除全能版
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            📄 Word / PDF 一鍵下載
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-snug hover:text-indigo-600 transition">
+                        <a href="直式定位版題目產生器-雅翔設計.html">數學直式定位板出題產生器</a>
+                    </h3>
+
+                    <p class="text-xs text-slate-500 mb-4 font-medium">
+                        適用對象：特教教師、學伴備課、空間知覺不良與直式常歪斜寫錯之學生
+                    </p>
+
+                    <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 text-slate-600 mb-5 border border-slate-100 flex-grow">
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold shrink-0">🎯 困境痛點：</span>
+                            <span>學童空間知覺較弱，在空白紙上計算常位值歪斜、進退位標記混亂導致算錯。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-indigo-600 font-bold shrink-0">💡 創新解方：</span>
+                            <span>自動產出適性大方格定位板、進位暫存盒、色彩輔助線，並提供一鍵切換解答卷與作業單匯出。</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#大格子輔助</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#多層進退位</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#教師解答卷</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mt-auto">
+                        <button onclick="openPreviewModal(4)" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-eye"></i> 教學導覽
+                        </button>
+                        <a href="直式定位版題目產生器-雅翔設計.html" class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                            <span>進入網頁</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 6: 線段圖：誰比誰多、誰比誰少 -->
+            <article class="tool-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden card-shadow flex flex-col"
+                     data-category="math"
+                     data-title="線段圖 誰比誰多 誰比誰少 應用題解題 幾何表徵 基準量 比較量 PDF"
+                     data-tags="數學 線段圖 應用題 比多比少 幾何表徵 步驟分解 作業單PDF">
+                <!-- 預覽縮圖 -->
+                <div class="preview-img-wrapper h-52 bg-sky-50 border-b border-slate-100 relative group cursor-pointer" onclick="openPreviewModal(5)">
+                    <img src="assets/previews/preview-bar-model.png" alt="線段圖誰比誰多誰比誰少畫面預覽" class="w-full h-full object-cover object-top" loading="lazy">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
+                        <span class="px-3 py-1.5 bg-white/95 rounded-xl text-xs font-bold text-slate-800 shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600"></i> 放大預覽畫面
+                        </span>
+                        <a href="線段圖：誰比誰多、誰比誰少.html" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟教材
+                        </a>
+                    </div>
+                    <span class="absolute top-3 left-3 px-3 py-1 bg-teal-600/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm">
+                        📏 幾何線段圖
+                    </span>
+                    <span class="absolute bottom-3 right-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-mono rounded-md">
+                        線段圖：誰比誰多、誰比誰少.html
+                    </span>
+                </div>
+
+                <!-- 卡片內容 -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
+                            破除看到多就加迷思
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                            SVG 動態線段長度
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-snug hover:text-indigo-600 transition">
+                        <a href="線段圖：誰比誰多、誰比誰少.html">線段圖：誰比誰多、誰比誰少</a>
+                    </h3>
+
+                    <p class="text-xs text-slate-500 mb-4 font-medium">
+                        適用對象：國小二至四年級、數學應用題閱讀理解卡關、看到關鍵字就盲猜者
+                    </p>
+
+                    <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 text-slate-600 mb-5 border border-slate-100 flex-grow">
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold shrink-0">🎯 困境痛點：</span>
+                            <span>學童常見「看到多就用加法、看到少就用減法」的機械化錯誤，無法理解數量關係。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-indigo-600 font-bold shrink-0">💡 創新解方：</span>
+                            <span>即時將文字化為對齊的視覺線段圖，分 4 步引導尋找基準量與差異量，並附 PDF 作業單生成。</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#視覺化幾何表徵</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#比較量概念</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#作業單PDF輸出</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mt-auto">
+                        <button onclick="openPreviewModal(5)" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-eye"></i> 教學導覽
+                        </button>
+                        <a href="線段圖：誰比誰多、誰比誰少.html" class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                            <span>進入網頁</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Card 7: 長度單位換算：單位階梯與位值滑動尺 -->
+            <article class="tool-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden card-shadow flex flex-col"
+                     data-category="math"
+                     data-title="長度單位換算 單位階梯與位值滑動尺 公里 公尺 公分 毫米 小數點位移 作業單"
+                     data-tags="數學 長度換算 單位階梯 位值滑動尺 具象化操作 小數點 自動出題">
+                <!-- 預覽縮圖 -->
+                <div class="preview-img-wrapper h-52 bg-emerald-50 border-b border-slate-100 relative group cursor-pointer" onclick="openPreviewModal(6)">
+                    <img src="assets/previews/preview-length-converter.png" alt="長度單位換算畫面預覽" class="w-full h-full object-cover object-top" loading="lazy">
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2.5">
+                        <span class="px-3 py-1.5 bg-white/95 rounded-xl text-xs font-bold text-slate-800 shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus text-indigo-600"></i> 放大預覽畫面
+                        </span>
+                        <a href="長度單位換算：單位階梯與位值滑動尺.html" onclick="event.stopPropagation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟教材
+                        </a>
+                    </div>
+                    <span class="absolute top-3 left-3 px-3 py-1 bg-emerald-600/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm">
+                        📐 單位換算滑動尺
+                    </span>
+                    <span class="absolute bottom-3 right-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-mono rounded-md">
+                        長度單位換算：單位階梯與位值滑動尺.html
+                    </span>
+                </div>
+
+                <!-- 卡片內容 -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            階梯法與滑動尺雙表徵
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+                            雙頁自適應作業單
+                        </span>
+                    </div>
+
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-snug hover:text-indigo-600 transition">
+                        <a href="長度單位換算：單位階梯與位值滑動尺.html">長度單位換算：單位階梯與位值滑動尺</a>
+                    </h3>
+
+                    <p class="text-xs text-slate-500 mb-4 font-medium">
+                        適用對象：國小三至六年級、公制單位換算補退零困難、小數點位移混淆學童
+                    </p>
+
+                    <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 text-slate-600 mb-5 border border-slate-100 flex-grow">
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-600 font-bold shrink-0">🎯 困境痛點：</span>
+                            <span>km、m、cm、mm 的 1000/100/10 倍換算過於抽象，補零或退零常數錯位數。</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-indigo-600 font-bold shrink-0">💡 創新解方：</span>
+                            <span>結合「上樓除、下樓乘」階梯與位值滑動尺，即時呈現小數點彈跳路徑與自動題目產生器。</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#具象化操作</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#小數點移動軌跡</span>
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] rounded-md font-medium">#題目解答作業單</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 mt-auto">
+                        <button onclick="openPreviewModal(6)" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-eye"></i> 教學導覽
+                        </button>
+                        <a href="長度單位換算：單位階梯與位值滑動尺.html" class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-100">
+                            <span>進入網頁</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- 查無搜尋結果提示 -->
+        <div id="no-results" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200 mt-6">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 text-2xl">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h4 class="text-lg font-bold text-slate-800 mb-1">找不到符合的教學網頁</h4>
+            <p class="text-sm text-slate-500 mb-4">請嘗試更換關鍵字，或點擊下方按鈕重設所有篩選條件。</p>
+            <button onclick="resetFilters()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 transition">
+                重設篩選條件
+            </button>
+        </div>
+
+    </main>
+
+    <!-- 督導會議教學設計理念專區 (Pedagogy & Supervision Section) -->
+    <section id="pedagogy-section" class="bg-white border-t border-slate-200 py-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
+                    督導研討核心架構
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-3 mb-4">
+                    雅翔自製適性教材的三大認知鷹架理念
+                </h2>
+                <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                    在特殊教育與學障教學中，輔具不是單純把紙本搬上螢幕，而是透過數位互動科技重新設計「認知的呈現方式」，徹底化解學童的學習焦慮。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 理念 1 -->
+                <div class="bg-slate-50 rounded-3xl p-6 border border-slate-100 relative">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl font-bold shadow-md shadow-amber-200 mb-5">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">1. 視覺表徵化 (Visual Representation)</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                        將抽象符號轉換為具象幾何。例如《線段圖》將「誰比誰多」具象化為兩條長短柱狀；《長度單位換算》透過滑動尺小數點彈跳，讓抽象的乘除倍數轉化為肉眼可見的空間位移。
+                    </p>
+                    <div class="text-[11px] font-semibold text-amber-800 bg-amber-100/70 px-2.5 py-1 rounded-lg">
+                        對應教材：線段圖、長度換算、Alike 心情色彩
+                    </div>
+                </div>
+
+                <!-- 理念 2 -->
+                <div class="bg-slate-50 rounded-3xl p-6 border border-slate-100 relative">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl font-bold shadow-md shadow-blue-200 mb-5">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">2. 工作記憶減負 (Cognitive Load Reduction)</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                        學障生最大的瓶頸往往是工作記憶容量有限。例如《多位數乘法》拆解成單步提問，讓孩子免於「一邊想九九乘法一邊記進位一邊對齊」，每一步驟皆可即時檢視與獲得引導。
+                    </p>
+                    <div class="text-[11px] font-semibold text-blue-800 bg-blue-100/70 px-2.5 py-1 rounded-lg">
+                        對應教材：乘法一步一步算、直式定位板產生器
+                    </div>
+                </div>
+
+                <!-- 理念 3 -->
+                <div class="bg-slate-50 rounded-3xl p-6 border border-slate-100 relative">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl font-bold shadow-md shadow-emerald-200 mb-5">
+                        <i class="fa-solid fa-stairs"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">3. 階梯式成功體驗 (Scaffolded Mastery)</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4">
+                        九宮格選題機制給予學童自主選擇權（連成一線即可完成），動態舒爾特方格自 3×3 到 7×7 自由調控，搭配「🔊 語音念讀」破除識字障礙，建立每一次微小成功的自我效能感。
+                    </p>
+                    <div class="text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-2.5 py-1 rounded-lg">
+                        對應教材：Alike 閱讀、Alike 寫作、動態舒爾特方格
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 學伴伴讀心法與督導建議 (Companion Guide Section) -->
+    <section id="companion-guide" class="bg-indigo-950 text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="px-3 py-1 rounded-full bg-white/10 text-indigo-300 text-xs font-bold border border-white/20">
+                    給大專伴讀大學生的指引手冊
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-white mt-3 mb-4">
+                    🤝 督導會議建議：學伴使用自製網頁的提問三部曲
+                </h2>
+                <p class="text-sm text-indigo-200 leading-relaxed">
+                    伴讀的核心不在於幫孩子把答案寫出來，而在於如何透過數位輔具引發思考對話。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/10">
+                    <div class="text-amber-400 text-sm font-bold mb-2 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-amber-400/20 flex items-center justify-center text-amber-300">1</span>
+                        動手前：引導觀察與猜想
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        「先不要急著按答案，看著螢幕上的線段圖／小男孩的顏色，你注意到了什麼不一樣的地方？」透過開放式提問讓孩子主動建立視覺心智模型。
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/10">
+                    <div class="text-sky-400 text-sm font-bold mb-2 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-sky-400/20 flex items-center justify-center text-sky-300">2</span>
+                        卡關時：善用網頁內建鷹架
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        當學童遇到阻礙時，提醒孩子：「我們來點一下『💡 提示』按鈕看看」，或是切換到長度滑動尺動手滑動，讓輔助科技承擔試錯成本。
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/10">
+                    <div class="text-emerald-400 text-sm font-bold mb-2 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-300">3</span>
+                        完成後：具體讚美思考歷程
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        不只誇獎「你好聰明」，而是具體肯定策略：「你剛才懂得先找出誰是小明再算小華，這個解題策略很棒！」並利用網頁產製的成果單作為學習檔案。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-10 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold">
+                    <i class="fa-solid fa-shapes"></i>
+                </div>
+                <div>
+                    <div class="text-white font-bold text-sm">中華民國學習障礙協會 ｜ 大專校院資源教室學伴計畫</div>
+                    <div class="text-slate-400 text-xs mt-0.5">督導會議教學教材展示大廳 ｜ 設計與開發者：雅翔 (Ya-Xiang)</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs">
+                <span>© 2026 特教適性自製數位教材</span>
+                <span class="text-slate-700">|</span>
+                <span>無廣告・免安裝・開源教育應用</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 畫面預覽與詳細導覽互動彈窗 (Modal) -->
+    <div id="preview-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200 transform scale-95 transition-transform duration-200" id="modal-box">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <span id="modal-category-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        領域分類
+                    </span>
+                    <h3 id="modal-title" class="text-lg font-black text-slate-900 truncate max-w-md">
+                        教材名稱
+                    </h3>
+                </div>
+                <button onclick="closePreviewModal()" class="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition" title="關閉 (Esc)">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (滾動區) -->
+            <div class="overflow-y-auto p-6 space-y-6 flex-grow">
+                <!-- 大圖預覽 -->
+                <div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-inner group relative">
+                    <img id="modal-img" src="" alt="教學畫面預覽" class="w-full h-auto object-cover object-top max-h-[440px]">
+                    <div class="absolute bottom-3 right-3 px-3 py-1 bg-slate-900/80 backdrop-blur-md text-white text-xs rounded-lg font-mono">
+                        <span id="modal-filename">filename.html</span>
+                    </div>
+                </div>
+
+                <!-- 導覽說明 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4">
+                        <h4 class="text-xs font-bold text-amber-900 mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> 學障學習困境與盲點
+                        </h4>
+                        <p id="modal-problem" class="text-xs text-amber-950 leading-relaxed"></p>
+                    </div>
+
+                    <div class="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4">
+                        <h4 class="text-xs font-bold text-indigo-900 mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> 雅翔自製網頁鷹架機制
+                        </h4>
+                        <p id="modal-solution" class="text-xs text-indigo-950 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- 學伴引導心法 -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                    <h4 class="text-xs font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-comments text-emerald-600"></i> 學伴一對一陪讀策略建議
+                    </h4>
+                    <p id="modal-strategy" class="text-xs text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <span class="text-xs text-slate-500">按 <kbd class="px-1.5 py-0.5 bg-slate-200 rounded text-[10px] font-mono">Esc</kbd> 鍵可快速關閉預覽</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="closePreviewModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold transition">
+                        關閉
+                    </button>
+                    <a id="modal-link-btn" href="#" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-indigo-100">
+                        <span>開啟此教學網頁</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 互動功能 -->
+    <script>
+        // 7 套自製工具的詳細規格清單
+        const toolsData = [
+            {
+                title: "《Alike 大同小異》閱讀思維九宮格",
+                file: "Alike 閱讀思維九宮格.html",
+                img: "assets/previews/preview-alike-reading.png",
+                category: "📖 語文閱讀",
+                badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
+                problem: "閱讀理解障礙學童常受困於大量文字的解碼困難，面對開放式推論問答常腦袋空白、無法從文本抓出佐證線索，常產生嚴重的抗拒排斥心理。",
+                solution: "以榮獲 64 項大獎之西班牙無字動畫《Alike》為基底，免除文字識字門檻！獨創「觀察 ➔ 推論 ➔ 找證據」三步引導鷹架，內建語音朗讀與符合 IEP 評量格式之檔案輸出。",
+                strategy: "陪伴時建議先讓學童聆聽語音問題，引導他「把你用眼睛看到的畫面說出來」，再鼓勵猜測人物心理，最後找出蛛絲馬跡，不強求一次答對所有題目。"
+            },
+            {
+                title: "《Alike》故事心情與創意寫作九宮格",
+                file: "Alike故事心情與創意寫作.html",
+                img: "assets/previews/preview-alike-writing.png",
+                category: "✍️ 創意寫作",
+                badgeClass: "bg-sky-100 text-sky-800 border-sky-300",
+                problem: "書寫表達障礙 (Dysgraphia) 與詞彙量匱乏的學童面對傳統作文題目常感到挫折，容易出現句子結構零碎、重複詞彙或完全寫不出字的情況。",
+                solution: "以動畫主角小男孩與爸爸身上的「色彩與情緒轉變」為靈感，設計 9 格獨立任務卡。提供豐富的情緒動詞庫、提示引導，讓孩子以九宮格連線自主挑選題目，輕鬆組合成篇章成果。",
+                strategy: "鼓勵學童先挑選最簡單或最有感覺的 3 格連成一條線（橫、直、斜皆可），善用各格內附的「💡 看提示」挑選好詞，維護寫作自信心。"
+            },
+            {
+                title: "動態舒爾特方格產生器 (Dynamic Schulte Table)",
+                file: "動態舒爾特方格.html",
+                img: "assets/previews/preview-schulte.png",
+                category: "🎯 專注力訓練",
+                badgeClass: "bg-violet-100 text-violet-800 border-violet-300",
+                problem: "注意力缺陷 (ADHD) 或視覺搜尋與追蹤協調不良的學童，在黑板抄寫與閱讀時常出現跳行、漏字、搜尋速度過慢等狀況，容易疲勞。",
+                solution: "支援 3×3 至 7×7 靈活維度，特別研發「動態隨機換位模式」，點擊數字時格子位置會隨機位移，大幅鍛鍊動態眼球追蹤、擴大周邊視野，並搭配逼真音效與本地成績排行。",
+                strategy: "適合在每次伴讀開始前進行 3~5 分鐘的注意力喚醒活動（Brain Warm-up）。可先從靜態 3×3 建立成就感，再循序漸進挑戰動態模式。"
+            },
+            {
+                title: "多位數乘法 一步一步算",
+                file: "多位數乘法 一步一步練習.html",
+                img: "assets/previews/preview-multiplication.png",
+                category: "✖️ 乘法運算",
+                badgeClass: "bg-blue-100 text-blue-800 border-blue-300",
+                problem: "多位數直式乘法運算過程繁雜，需同時維持「被乘數×乘數」、「九九乘法表檢索」、「進位數暫存」與「位值對齊相加」，工作記憶容量過載是算錯主因。",
+                solution: "嚴格落實工作記憶減負理論（Cognitive Load Reduction），將乘法運算拆解成循序漸進的單一步驟問答與動態視覺高亮，並附有智慧提示與隨機出題功能。",
+                strategy: "學伴可以帶著學童自訂課本上的難題，觀察學童是在乘法計算出錯、還是進位加法出錯，精確鎖定認知斷點並提供微引導。"
+            },
+            {
+                title: "數學直式定位板出題產生器（雅翔設計）",
+                file: "直式定位版題目產生器-雅翔設計.html",
+                img: "assets/previews/preview-place-value.png",
+                category: "🖨 出題輔具",
+                badgeClass: "bg-indigo-100 text-indigo-800 border-indigo-300",
+                problem: "空間知覺與肌肉協調較弱的學童，在普通白紙或小格子作業簿上寫直式計算時，常位值歪斜（個位對到十位）、多層進位標記混亂看不清，導致算對卻寫錯。",
+                solution: "雅翔老師自製全能直式出題器！涵蓋加減乘除（含多位除數與多層進退位），提供適性放大方格、色彩輔助線，並能一鍵產生教師解答卷與匯出可列印 Word / PDF 作業單。",
+                strategy: "伴讀前可根據學童當前學習進度，現場 1 分鐘快速客製產出專屬練習單。整潔的大格子與色彩指引能大幅減輕學童的視覺對齊負擔。"
+            },
+            {
+                title: "線段圖：誰比誰多、誰比誰少",
+                file: "線段圖：誰比誰多、誰比誰少.html",
+                img: "assets/previews/preview-bar-model.png",
+                category: "📏 幾何線段圖",
+                badgeClass: "bg-teal-100 text-teal-800 border-teal-300",
+                problem: "學童常掉入「看到『多』就用加法、看到『少』就用減法」的機械化關鍵字陷阱，對基準量與比較量的語意關係缺乏空間表徵。",
+                solution: "動態 SVG 幾何線段表徵系統！依據使用者設定動態繪製對齊線段，分 4 步帶領拆解題意（誰比較長、多出來的在哪裡、如何求未知數），並支援自動列印學生作業單與解答 PDF。",
+                strategy: "指導時請先讓學童看線段圖回答：「你看小華跟小明誰的積木條比較長？」，引導學童建立心智表徵，破除盲目套公式的解題壞習慣。"
+            },
+            {
+                title: "長度單位換算：單位階梯與位值滑動尺",
+                file: "長度單位換算：單位階梯與位值滑動尺.html",
+                img: "assets/previews/preview-length-converter.png",
+                category: "📐 單位換算滑動尺",
+                badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                problem: "公里 (km)、公尺 (m)、公分 (cm)、毫米 (mm) 的進率有 1000、100、10 不同倍數，小數點向左向右跳格、補零退位極易混淆與遺漏。",
+                solution: "整合「具象單位階梯（上樓除、下樓乘）」與「位值滑動尺（小數點對齊與補零網格）」雙重視覺表徵，可自由輸入數值呈現每一步動態軌跡，並內建自動出題作業單下載。",
+                strategy: "陪伴時可先讓學童在滑動尺上親眼看到小數點如何跳格、哪裡該補 0，再對照階梯圖理解乘除邏輯，透過雙重編碼實現深層理解。"
+            }
+        ];
+
+        // 篩選與搜尋狀態
+        let currentFilter = 'all';
+        let searchQuery = '';
+
+        // 分類篩選
+        function setFilter(category, btn) {
+            currentFilter = category;
+            
+            // 更新按鈕樣式
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active-tab', 'bg-indigo-600', 'text-white');
+                b.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            btn.classList.remove('bg-slate-100', 'text-slate-600');
+            btn.classList.add('active-tab', 'bg-indigo-600', 'text-white');
+
+            filterCards();
+        }
+
+        // 關鍵字搜尋
+        function handleSearch() {
+            const input = document.getElementById('search-input');
+            const clearBtn = document.getElementById('clear-search-btn');
+            searchQuery = input.value.trim().toLowerCase();
+
+            if (searchQuery.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            filterCards();
+        }
+
+        // 清除搜尋
+        function clearSearch() {
+            const input = document.getElementById('search-input');
+            input.value = '';
+            searchQuery = '';
+            document.getElementById('clear-search-btn').classList.add('hidden');
+            filterCards();
+            input.focus();
+        }
+
+        // 重設所有篩選
+        function resetFilters() {
+            const allBtn = document.querySelector('#filter-tabs button:first-child');
+            setFilter('all', allBtn);
+            clearSearch();
+        }
+
+        // 核心過濾邏輯
+        function filterCards() {
+            const cards = document.querySelectorAll('.tool-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                const title = card.getAttribute('data-title').toLowerCase();
+                const tags = card.getAttribute('data-tags').toLowerCase();
+
+                const matchesFilter = (currentFilter === 'all' || category === currentFilter);
+                const matchesSearch = (searchQuery === '' || title.includes(searchQuery) || tags.includes(searchQuery));
+
+                if (matchesFilter && matchesSearch) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('visible-count').textContent = visibleCount;
+            const noResults = document.getElementById('no-results');
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+
+        // 開啟教材預覽彈窗
+        function openPreviewModal(index) {
+            const item = toolsData[index];
+            if (!item) return;
+
+            document.getElementById('modal-title').textContent = item.title;
+            document.getElementById('modal-img').src = item.img;
+            document.getElementById('modal-img').alt = item.title + " 畫面預覽";
+            document.getElementById('modal-filename').textContent = item.file;
+            document.getElementById('modal-category-badge').textContent = item.category;
+            document.getElementById('modal-problem').textContent = item.problem;
+            document.getElementById('modal-solution').textContent = item.solution;
+            document.getElementById('modal-strategy').textContent = item.strategy;
+            document.getElementById('modal-link-btn').href = item.file;
+
+            const modal = document.getElementById('preview-modal');
+            const box = document.getElementById('modal-box');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+                box.classList.add('scale-100');
+            }, 10);
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 關閉教材預覽彈窗
+        function closePreviewModal() {
+            const modal = document.getElementById('preview-modal');
+            const box = document.getElementById('modal-box');
+            
+            modal.classList.add('opacity-0');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        // 點擊背景關閉彈窗
+        document.getElementById('preview-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreviewModal();
+            }
+        });
+
+        // 鍵盤快捷鍵支援
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePreviewModal();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                document.getElementById('search-input').focus();
+            }
+        });
+
+        // 平滑滾動到頂部
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
